@@ -12,57 +12,35 @@
 <body>
   <div class="app">
     <nav class="menu">
-      <a href="#">Início</a>
-      <a href="#">Afinador</a>
+      <a href="index.html" class="active">Início</a>
+      <a href="afinador.html">Afinador</a>
       <a href="#">Sobre</a>
     </nav>
     <h1>🎸 Afinador de Violão</h1>
-    <p>Toque uma corda para afinar (detecção automática ou selecione manualmente)</p>
-
-    <div class="strings-container" id="stringsContainer"></div>
     
-    <div class="auto-detect-info" id="autoDetectInfo" style="display: none;">
-      <span class="auto-detect-badge">🎵 Corda detectada automaticamente</span>
-    </div>
-
-    <div class="freq" id="frequency">-- Hz</div>
-    <div class="note" id="note">--</div>
-    <div class="note-full-name" id="noteFullName"></div>
-
-    <div class="tuned-lamp">
-      <div class="lamp idle" id="tunedLamp"></div>
-      <div class="lamp-label" id="lampLabel">Aguardando</div>
-    </div>
-    
-    <div class="string-info" id="stringInfo" style="display: none;">
-      <div class="string-info-title">ℹ️ Informações da Corda</div>
-      <div class="string-info-item" id="stringInfoContent"></div>
-    </div>
-    
-    <div class="tuning-indicator" id="tuningIndicator" style="display: none;">
-      <div class="tuning-arrow" id="tuningArrow">→</div>
-    </div>
-    
-    <div class="tuning-bar-container">
-      <div class="tuning-bar" id="tuningBar"></div>
-    </div>
-    
-    <div class="accuracy-text" id="accuracyText"></div>
-    <div class="progress-info">
-      <span>Muito Baixo</span>
-      <span id="targetFreq">-- Hz</span>
-      <span>Muito Alto</span>
-    </div>
-    
-    <div class="status" id="status">Selecione uma corda para começar</div>
-
-    <button class="start-btn" id="startBtn">Iniciar Afinador</button>
-
-    <div class="info-text">
-      Clique em uma corda acima para afinar
+    <div class="home-content">
+      <p>Bem-vindo ao Afinador de Violão!</p>
+      <p>Um afinador preciso e fácil de usar para seu instrumento.</p>
+      
+      <div class="features">
+        <div class="feature-card">
+          <h2>🎵 Detecção Automática</h2>
+          <p>Detecta automaticamente qual corda está sendo tocada</p>
+        </div>
+        
+        <div class="feature-card">
+          <h2>⚡ Tempo Real</h2>
+          <p>Feedback instantâneo da afinação de seu violão</p>
+        </div>
+        
+        <div class="feature-card">
+          <h2>🔧 Simples e Eficiente</h2>
+          <p>Interface intuitiva para todos os níveis de experiência</p>
+        </div>
+      </div>
+      
+      <a href="afinador.html" class="cta-btn">Começar a Afinar</a>
     </div>
   </div>
-
-  <script src="assets/js/app.js" defer></script>
 </body>
 </html>

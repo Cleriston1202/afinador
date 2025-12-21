@@ -5,8 +5,6 @@ const noteEl = document.getElementById('note');
 const noteFullNameEl = document.getElementById('noteFullName');
 const statusEl = document.getElementById('status');
 const stringsContainer = document.getElementById('stringsContainer');
-const tuningIndicator = document.getElementById('tuningIndicator');
-const tuningArrow = document.getElementById('tuningArrow');
 const tuningBar = document.getElementById('tuningBar');
 const accuracyText = document.getElementById('accuracyText');
 const targetFreq = document.getElementById('targetFreq');
@@ -15,6 +13,8 @@ const stringInfoContent = document.getElementById('stringInfoContent');
 const tunedLamp = document.getElementById('tunedLamp');
 const lampLabel = document.getElementById('lampLabel');
 const autoDetectInfo = document.getElementById('autoDetectInfo');
+const tuningSection = document.getElementById('tuningSection');
+const backBtn = document.getElementById('backBtn');
 
 let audioContext;
 let analyser;
@@ -47,9 +47,10 @@ const MAX_HISTORY_EXTENDED = 16; // histórico maior para melhor suavização
 let autoDetectedString = null;
 let autoDetectConfidence = 0;
 let lastAutoDetectTime = 0;
+let isAudioRunning = false;
 
 function setLamp(state, text) {
-  tunedLamp.className = 'lamp ' + state;
+  tunedLamp.className = 'lamp-large ' + state;
   lampLabel.textContent = text;
 }
 
@@ -100,15 +101,34 @@ function selectString(index) {
     <strong>Descrição:</strong> ${selectedString.description}
   `;
   stringInfo.style.display = 'block';
-  statusEl.textContent = 'Pronto para afinar';
+  statusEl.textContent = 'Corda selecionada - Clique em Iniciar Afinador';
   statusEl.className = 'status';
   tuningBar.style.width = '0%';
   accuracyText.textContent = '';
-  tuningIndicator.style.display = 'none';
   setLamp('idle', 'Pronto');
   lastFrequency = null;
   autoDetectInfo.style.display = 'none';
+  
+  // Mostra a seção de afinação
+  tuningSection.style.display = 'block';
 }
+
+backBtn.addEventListener('click', () => {
+  // Para o afinador
+  if (isAudioRunning && audioContext) {
+    audioContext.close();
+    audioContext = null;
+    isAudioRunning = false;
+  }
+  
+  // Volta para seleção de corda
+  selectedString = null;
+  tuningSection.style.display = 'none';
+  document.querySelectorAll('.string-btn').forEach(btn => btn.classList.remove('active'));
+  startBtn.disabled = false;
+  startBtn.textContent = 'Iniciar Afinador';
+  freqHistory = [];
+});
 
 startBtn.addEventListener('click', async () => {
   if (!selectedString) {
@@ -117,7 +137,8 @@ startBtn.addEventListener('click', async () => {
     return;
   }
   startBtn.disabled = true;
-  startBtn.textContent = 'Afinador Ativo';
+  startBtn.textContent = 'Afinador Ativo...';
+  isAudioRunning = true;
   try {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -142,10 +163,11 @@ startBtn.addEventListener('click', async () => {
     lowpass.connect(analyser);
     detectPitch();
   } catch (error) {
-    statusEl.textContent = 'Erro ao acessar o microfone';
+    statusEl.textContent = 'Erro ao acessar o microfone. Permita acesso ao áudio.';
     statusEl.className = 'status high';
     startBtn.disabled = false;
     startBtn.textContent = 'Iniciar Afinador';
+    isAudioRunning = false;
   }
 });
 
@@ -232,28 +254,28 @@ function detectPitch() {
       accuracyText.textContent = `✓ Perfeito! (${absCents} cents)`;
       accuracyText.classList.add('accuracy-good');
     } else if (absCents < 10) {
-      accuracyText.textContent = `Muito próximo! (${absCents} cents) - Continue ajustando`;
+      accuracyText.textContent = `Muito próximo! (${absCents} cents)`;
       accuracyText.classList.add('accuracy-veryclose');
     } else if (absCents < 20) {
-      accuracyText.textContent = `Próximo (${absCents} cents) - Você está no caminho certo!`;
+      accuracyText.textContent = `Próximo (${absCents} cents)`;
       accuracyText.classList.add('accuracy-mid');
     } else if (absCents < 30) {
-      accuracyText.textContent = `Aproximando (${absCents} cents) - Continue ajustando`;
+      accuracyText.textContent = `Aproximando (${absCents} cents)`;
       accuracyText.classList.add('accuracy-low');
     } else {
-      accuracyText.textContent = `Longe (${absCents} cents) - Ajuste mais`;
+      accuracyText.textContent = `Ajuste mais (${absCents} cents)`;
       accuracyText.classList.add('accuracy-far');
     }
     let improvingText = '';
     if (lastFrequency !== null) {
       const lastDiff = Math.abs(lastFrequency - targetFreqVal);
       const currentDiff = Math.abs(smoothFrequency - targetFreqVal);
-      if (currentDiff < lastDiff) improvingText = ' 📈 Melhorando!';
-      else if (currentDiff > lastDiff) improvingText = ' 📉 Afastando';
+      if (currentDiff < lastDiff) improvingText = ' 📈';
+      else if (currentDiff > lastDiff) improvingText = ' 📉';
     }
     lastFrequency = smoothFrequency;
     if (absCents < 5) {
-      statusEl.textContent = '✓✓✓ PERFEITAMENTE AFINADO! ✓✓✓';
+      statusEl.textContent = '✓ PERFEITAMENTE AFINADO! ✓';
       statusEl.className = 'status ok';
     } else if (absCents < 10) {
       statusEl.textContent = `Quase lá! (${absCents} cents)${improvingText}`;
@@ -263,7 +285,7 @@ function detectPitch() {
       statusEl.className = 'status close';
     } else if (diff < 0) {
       if (absCents < 30) {
-        statusEl.textContent = `Baixo (${absCents} cents) - Aumente um pouco${improvingText}`;
+        statusEl.textContent = `Baixo (${absCents} cents) - Aumente${improvingText}`;
         statusEl.className = 'status low';
       } else {
         statusEl.textContent = `Muito baixo (${absCents} cents) - Aumente mais${improvingText}`;
@@ -271,7 +293,7 @@ function detectPitch() {
       }
     } else {
       if (absCents < 30) {
-        statusEl.textContent = `Alto (${absCents} cents) - Diminua um pouco${improvingText}`;
+        statusEl.textContent = `Alto (${absCents} cents) - Diminua${improvingText}`;
         statusEl.className = 'status high';
       } else {
         statusEl.textContent = `Muito alto (${absCents} cents) - Diminua mais${improvingText}`;
@@ -281,7 +303,6 @@ function detectPitch() {
   } else if (currentString) {
     statusEl.textContent = 'Aguardando som...';
     statusEl.className = 'status';
-    tuningIndicator.style.display = 'none';
     tuningBar.style.width = '0%';
     accuracyText.className = 'accuracy-text';
     accuracyText.textContent = '';
