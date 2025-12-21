@@ -136,6 +136,22 @@ function showChordMajorMinor(note, type) {
     const strings = ['E2','A2','D3','G3','B3','E4'];
     document.querySelectorAll('#pins .pin').forEach(el => el.classList.remove('chord-muted'));
     
+    // Remove textos anteriores de numeração de dedos
+    document.querySelectorAll('#pins text').forEach(el => el.remove());
+    
+    let fingerCount = 0;
+    const fingerMap = {};
+    
+    // Primeira passagem: mapear dedos para posições (de baixo para cima, ignorando cordas abertas e mudas)
+    strings.forEach((s, i) => {
+        const fret = chord.frets[i];
+        if (fret > 0) {  // Só conta como dedo se fret > 0 (não é corda aberta nem muda)
+            if (!fingerMap[fret]) {
+                fingerMap[fret] = ++fingerCount;
+            }
+        }
+    });
+    
     strings.forEach((s, i) => {
         const fret = chord.frets[i];
         if (fret === -1) {
@@ -149,6 +165,25 @@ function showChordMajorMinor(note, type) {
             const id = `pin-${s}-${fret}`;
             const el = document.getElementById(id);
             if (el) el.classList.add('active');
+            
+            // Adiciona número do dedo se necessário
+            if (fret > 0) {
+                const fingerNum = fingerMap[fret];
+                const svg = document.getElementById('pins').parentElement;
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                const circle = el;
+                const cx = parseFloat(circle.getAttribute('cx'));
+                const cy = parseFloat(circle.getAttribute('cy'));
+                
+                text.setAttribute('x', cx);
+                text.setAttribute('y', cy);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.setAttribute('class', 'pin-finger-label');
+                text.textContent = fingerNum;
+                
+                document.getElementById('pins').appendChild(text);
+            }
         }
     });
     
