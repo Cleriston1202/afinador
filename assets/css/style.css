@@ -149,6 +149,38 @@ img, svg {
     display: block; 
 }
 
+/* Select Styling */
+select {
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    border: 2px solid rgba(76, 175, 80, 0.3);
+    background-color: white;
+    color: #333;
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-family: 'Roboto', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234CAF50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+select:hover {
+    border-color: rgba(76, 175, 80, 0.6);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+}
+
+select:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
 /* Buttons */
 .btn-primary, .btn-secondary {
     display: inline-block;

@@ -46,8 +46,24 @@
     filter: drop-shadow(0 6px 12px rgba(255,235,59,0.25)); 
 }
 
+.pin.open-string {
+    fill: #90EE90;
+    opacity: 0.8;
+}
+
+.pin.open-string.active {
+    fill: #90EE90;
+    stroke: #fff;
+    filter: drop-shadow(0 6px 12px rgba(144,238,144,0.4));
+}
+
+.pin.barre-chord {
+    r: 12;
+    filter: drop-shadow(0 0 10px rgba(255,235,59,0.6));
+}
+
 .pin-finger-label {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: bold;
     fill: #1a1a1a;
     pointer-events: none;
@@ -70,9 +86,27 @@
 }
 
 .chord-controls select { 
-    padding: 0.4rem 0.6rem; 
-    border-radius: 6px; 
-    border: none; 
+    padding: 0.5rem 0.8rem; 
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #333;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chord-controls select:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.chord-controls select:focus {
+    outline: none;
+    border-color: #ffeb3b;
+    box-shadow: 0 0 0 3px rgba(255, 235, 59, 0.2);
 }
 
 .chord-controls .chord-info { 
@@ -123,10 +157,27 @@
 }
 
 .config-group select {
-    padding: 0.4rem 0.6rem;
-    border-radius: 6px;
-    border: 1px solid rgba(0,0,0,0.1);
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #333;
     font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.config-group select:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.config-group select:focus {
+    outline: none;
+    border-color: #ffeb3b;
+    box-shadow: 0 0 0 3px rgba(255, 235, 59, 0.2);
 }
 
 .note-info {
@@ -171,6 +222,7 @@
     .notes-controls { width: 100%; display: flex; gap: 0.5rem; }
     #fretboard { max-width: 100%; height: auto; }
     .config-controls { flex-direction: column; align-items: stretch; }
-    .config-group { justify-content: space-between; }
-    .config-group select { width: 100%; }
+    .config-group { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+    .config-group select { width: 100%; padding: 0.6rem; }
+    select { width: 100%; }
 }
