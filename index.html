@@ -132,42 +132,37 @@
                     
                     <!-- Configurador de notas -->
                     <div class="note-configurator">
-                        <h3>Explorar Notas</h3>
+                        <h3>Explorar Acordes Maiores e Menores</h3>
                         <div class="config-controls">
                             <div class="config-group">
-                                <label for="string-select">Corda:</label>
-                                <select id="string-select">
+                                <label for="note-base-select">Nota Base:</label>
+                                <select id="note-base-select">
                                     <option value="">-- Escolher --</option>
-                                    <option value="E2">E2 (Mi baixo)</option>
-                                    <option value="A2">A2 (Lá)</option>
-                                    <option value="D3">D3 (Ré)</option>
-                                    <option value="G3">G3 (Sol)</option>
-                                    <option value="B3">B3 (Si)</option>
-                                    <option value="E4">E4 (Mi agudo)</option>
+                                    <option value="C">C (Dó)</option>
+                                    <option value="C#">C# (Dó#)</option>
+                                    <option value="D">D (Ré)</option>
+                                    <option value="D#">D# (Ré#)</option>
+                                    <option value="E">E (Mi)</option>
+                                    <option value="F">F (Fá)</option>
+                                    <option value="F#">F# (Fá#)</option>
+                                    <option value="G">G (Sol)</option>
+                                    <option value="G#">G# (Sol#)</option>
+                                    <option value="A">A (Lá)</option>
+                                    <option value="A#">A# (Lá#)</option>
+                                    <option value="B">B (Si)</option>
                                 </select>
                             </div>
                             <div class="config-group">
-                                <label for="fret-select">Casa:</label>
-                                <select id="fret-select">
+                                <label for="chord-type-select">Tipo de Acorde:</label>
+                                <select id="chord-type-select">
                                     <option value="">-- Escolher --</option>
-                                    <option value="0">0 (Corda aberta)</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                    <option value="6">6</option>
-                                    <option value="7">7</option>
-                                    <option value="8">8</option>
-                                    <option value="9">9</option>
-                                    <option value="10">10</option>
-                                    <option value="11">11</option>
-                                    <option value="12">12</option>
+                                    <option value="major">Maior</option>
+                                    <option value="minor">Menor</option>
                                 </select>
                             </div>
-                            <button id="show-note-position-btn" class="btn-secondary">Mostrar Posição</button>
+                            <button id="show-chord-positions-btn" class="btn-secondary">Mostrar Acorde</button>
                         </div>
-                        <div id="note-info" class="note-info"></div>
+                        <div id="chord-positions-info" class="chord-positions-info"></div>
                     </div>
                     <div class="chord-controls">
                         <label for="chord-select">Selecionar Acorde:</label>

@@ -64,6 +64,37 @@ function prevNote() {
     highlightPin(notesSequence[notesIndex]);
 }
 
+/* Chords: definição completa para todas as notas maiores e menores */
+const CHORDS_ALL = {
+    // Maiores
+    'C_major':  { frets: [-1,3,2,0,1,0], name: 'C Maior (Dó)' },
+    'C#_major': { frets: [-1,-1,4,1,1,1], name: 'C# Maior (Dó#)' },
+    'D_major':  { frets: [-1,-1,0,2,3,2], name: 'D Maior (Ré)' },
+    'D#_major': { frets: [-1,-1,1,3,4,3], name: 'D# Maior (Ré#)' },
+    'E_major':  { frets: [0,2,2,1,0,0], name: 'E Maior (Mi)' },
+    'F_major':  { frets: [1,3,3,2,1,1], name: 'F Maior (Fá)' },
+    'F#_major': { frets: [2,4,4,3,2,2], name: 'F# Maior (Fá#)' },
+    'G_major':  { frets: [3,2,0,0,0,3], name: 'G Maior (Sol)' },
+    'G#_major': { frets: [4,3,1,1,1,4], name: 'G# Maior (Sol#)' },
+    'A_major':  { frets: [-1,0,2,2,2,0], name: 'A Maior (Lá)' },
+    'A#_major': { frets: [-1,1,3,3,3,1], name: 'A# Maior (Lá#)' },
+    'B_major':  { frets: [2,2,4,4,4,2], name: 'B Maior (Si)' },
+    
+    // Menores
+    'C_minor':  { frets: [-1,3,1,0,1,0], name: 'Cm Menor (Dó)' },
+    'C#_minor': { frets: [-1,-1,4,2,4,1], name: 'C#m Menor (Dó#)' },
+    'D_minor':  { frets: [-1,-1,0,2,3,1], name: 'Dm Menor (Ré)' },
+    'D#_minor': { frets: [-1,-1,1,3,4,2], name: 'D#m Menor (Ré#)' },
+    'E_minor':  { frets: [0,2,2,0,0,0], name: 'Em Menor (Mi)' },
+    'F_minor':  { frets: [1,3,3,1,1,1], name: 'Fm Menor (Fá)' },
+    'F#_minor': { frets: [2,4,4,2,2,2], name: 'F#m Menor (Fá#)' },
+    'G_minor':  { frets: [3,5,5,3,3,3], name: 'Gm Menor (Sol)' },
+    'G#_minor': { frets: [4,6,6,4,4,4], name: 'G#m Menor (Sol#)' },
+    'A_minor':  { frets: [-1,0,2,2,1,0], name: 'Am Menor (Lá)' },
+    'A#_minor': { frets: [-1,1,3,3,2,1], name: 'A#m Menor (Lá#)' },
+    'B_minor':  { frets: [2,2,4,4,3,2], name: 'Bm Menor (Si)' }
+};
+
 /* Chords: definição e visualização */
 const CHORDS = {
     'C':  { frets: [-1,3,2,0,1,0], name: 'C (Dó Maior)' },
@@ -94,6 +125,41 @@ function showChord(chordKey) {
     });
     const chordInfo = document.getElementById('chord-info');
     if (chordInfo) chordInfo.textContent = `${chord.name} — posições: ${chord.frets.map(v => v===-1? 'x': v).join(' ')}`;
+}
+
+function showChordMajorMinor(note, type) {
+    const chordKey = `${note}_${type}`;
+    const chord = CHORDS_ALL[chordKey];
+    if (!chord) return;
+    
+    clearActivePins();
+    const strings = ['E2','A2','D3','G3','B3','E4'];
+    document.querySelectorAll('#pins .pin').forEach(el => el.classList.remove('chord-muted'));
+    
+    strings.forEach((s, i) => {
+        const fret = chord.frets[i];
+        if (fret === -1) {
+            // Corda muda
+            for (let f = 0; f <= 12; f++) {
+                const el = document.getElementById(`pin-${s}-${f}`);
+                if (el) el.classList.add('chord-muted');
+            }
+        } else {
+            // Destaca o pin da posição
+            const id = `pin-${s}-${fret}`;
+            const el = document.getElementById(id);
+            if (el) el.classList.add('active');
+        }
+    });
+    
+    const positionsInfo = document.getElementById('chord-positions-info');
+    if (positionsInfo) {
+        const posStr = chord.frets.map((v, i) => {
+            if (v === -1) return `${strings[i]}: X (mudo)`;
+            return `${strings[i]}: ${v}`;
+        }).join(' | ');
+        positionsInfo.textContent = `${chord.name} — ${posStr}`;
+    }
 }
 
 function strumChord(chordKey) {
@@ -193,6 +259,32 @@ function initNotasSection() {
         const chord = chordSelect.value;
         if (chordInfo) chordInfo.textContent = chord ? `Acorde selecionado: ${chord}` : '';
     });
+
+    // Configurador de acordes maiores e menores
+    const noteBaseSelect = document.getElementById('note-base-select');
+    const chordTypeSelect = document.getElementById('chord-type-select');
+    const showChordPositionsBtn = document.getElementById('show-chord-positions-btn');
+    const chordPositionsInfo = document.getElementById('chord-positions-info');
+
+    const updateChordDisplay = () => {
+        const noteBase = noteBaseSelect ? noteBaseSelect.value : '';
+        const chordType = chordTypeSelect ? chordTypeSelect.value : '';
+        if (noteBase && chordType) {
+            showChordMajorMinor(noteBase, chordType);
+        }
+    };
+
+    if (noteBaseSelect) {
+        noteBaseSelect.addEventListener('change', updateChordDisplay);
+    }
+
+    if (chordTypeSelect) {
+        chordTypeSelect.addEventListener('change', updateChordDisplay);
+    }
+
+    if (showChordPositionsBtn) {
+        showChordPositionsBtn.addEventListener('click', updateChordDisplay);
+    }
 
     // Configurador de notas
     const stringSelect = document.getElementById('string-select');

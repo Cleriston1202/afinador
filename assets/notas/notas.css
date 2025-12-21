@@ -125,6 +125,18 @@
     text-align: center;
 }
 
+.chord-positions-info {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: rgba(255,235,59,0.1);
+    border-radius: 8px;
+    border-left: 4px solid #ffeb3b;
+    color: #ffeb3b;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
 /* Responsividade */
 @media (max-width: 520px) {
     .notas-top { 
