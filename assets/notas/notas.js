@@ -241,17 +241,27 @@ function showChordMajorMinor(note, type) {
                     label.textContent = fingerNum || '';
                     pinsGroup.appendChild(label);
 
-                        // traço fino acima das cordas para destacar o barré (cobre a largura da barra)
-                        const topLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                        const lineY = barY - Math.max(8, barHeight/2) - 4; // posicione ligeiramente acima da barra
-                        topLine.setAttribute('x1', barX);
-                        topLine.setAttribute('x2', barX + barW);
-                        topLine.setAttribute('y1', lineY);
-                        topLine.setAttribute('y2', lineY);
-                        topLine.setAttribute('class', 'barre-top-line');
-                        topLine.setAttribute('stroke-width', '3');
-                        topLine.setAttribute('stroke-linecap', 'round');
-                        pinsGroup.appendChild(topLine);
+                        // traço vertical que marca o barré (vai de cima a baixo das cordas afetadas)
+                        const vertLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        // centralizar a linha vertical no centro da barra
+                        const lineX = (barX + (barX + barW)) / 2;
+                        // calcular y mínimo e máximo das cordas afetadas
+                        const cyListAll = [];
+                        strings.forEach((ss, ii) => {
+                            const p = document.getElementById(`pin-${ss}-${fret}`);
+                            if (p) cyListAll.push(parseFloat(p.getAttribute('cy')));
+                        });
+                        const minY = Math.min(...cyListAll);
+                        const maxY = Math.max(...cyListAll);
+                        const padY = 8;
+                        vertLine.setAttribute('x1', lineX);
+                        vertLine.setAttribute('x2', lineX);
+                        vertLine.setAttribute('y1', minY - padY);
+                        vertLine.setAttribute('y2', maxY + padY);
+                        vertLine.setAttribute('class', 'barre-vertical-line');
+                        vertLine.setAttribute('stroke-width', '4');
+                        vertLine.setAttribute('stroke-linecap', 'round');
+                        pinsGroup.appendChild(vertLine);
                 }
                 // marcar visualmente os pins individuais tamb9m
                 el.classList.add('barre-chord');
