@@ -162,6 +162,40 @@ main {
     color: var(--primary-color);
 }
 
+/* Hero card */
+.hero-card {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 1.5rem;
+    align-items: center;
+}
+.hero-content h1 { font-size: 2.1rem; margin-bottom: 0.25rem; }
+.brand { color: var(--primary-color); }
+.lead { color: #555; margin-bottom: 1rem; }
+.hero-actions { display: flex; gap: 0.75rem; align-items: center; }
+
+.hero-visual { display:flex; justify-content:center; align-items:center; }
+.hero-visual .home-image { max-width: 100%; border-radius: 12px; }
+
+/* Controls area */
+.controls { display:flex; gap:0.5rem; align-items:center; }
+
+.tuner-card { background: linear-gradient(180deg,#fff,#fbfbfb); border-radius:14px; padding:1.5rem; box-shadow: var(--shadow); width:100%; }
+.tuner-top { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; }
+
+.btn-primary { background: linear-gradient(90deg, var(--primary-color), #43a047); box-shadow: 0 6px 18px rgba(76,175,80,0.12); }
+.btn-secondary { background: linear-gradient(90deg, var(--secondary-color), #3949ab); box-shadow: 0 6px 18px rgba(63,81,181,0.08); }
+
+.afinador-display { display:flex; flex-direction:column; align-items:center; gap:0.25rem; margin: 1rem 0; }
+.current-note-display { font-size:4.5rem; font-weight:700; color:var(--text-color); }
+.current-freq-display { color:#666; font-size:1.25rem; }
+
+.status-message { font-size:1rem; padding:0.6rem 1rem; border-radius:8px; background: rgba(0,0,0,0.02); display:inline-block; margin-top:0.75rem; }
+
+/* Tuning bar fallback for small screens */
+.tuning-bar { height:10px; background:#eee; border-radius:6px; width:80%; margin:0.75rem auto; }
+
+
 .tuner-card {
     display: flex;
     flex-direction: column;
@@ -242,7 +276,7 @@ main {
     left: 50%;
     transform-origin: bottom center;
     transform: translateX(-50%) rotate(0deg);
-    transition: transform 0.1s ease-out; /* Transição mais rápida */
+    transition: none; /* Animação controlada via JS para suavização precisa */
     box-shadow: 0 0 5px rgba(0,0,0,0.2);
     z-index: 10;
     border-radius: 2px 2px 0 0;
@@ -320,4 +354,5 @@ main {
     .tuner-needle {
         height: 80px;
     }
+    .hero-card { grid-template-columns: 1fr; }
 }

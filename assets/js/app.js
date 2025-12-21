@@ -45,7 +45,8 @@ function updateTunerDisplay(freq, notaObj, diffCents) {
     // Mapeamos os cents para a rotação da agulha.
     let rotation = diffCents * 1.2; // 120 graus / 100 cents = 1.2 graus por cent
     rotation = Math.max(-60, Math.min(60, rotation)); // Limita a rotação
-    tunerNeedle.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+    // Atualiza o alvo da agulha; a animação fará a interpolação
+    needleAngleTarget = rotation;
 
     // Atualiza a mensagem de status
     if (Math.abs(diffCents) < 5) { // Tolerância de +/- 5 cents
@@ -72,6 +73,17 @@ function resetTunerDisplay() {
     targetFreqDisplay.textContent = "0.00";
     tunerNeedle.style.transform = `translateX(-50%) rotate(0deg)`;
     currentNoteDisplay.style.color = "var(--text-color)";
+    // reset target/current
+    needleAngleTarget = 0;
+    needleAngleCurrent = 0;
+}
+
+// Loop de animação da agulha (interpola o ângulo alvo)
+function animateNeedleLoop() {
+    if (!tunerNeedle) return;
+    needleAngleCurrent += (needleAngleTarget - needleAngleCurrent) * NEEDLE_SMOOTHING;
+    tunerNeedle.style.transform = `translateX(-50%) rotate(${needleAngleCurrent}deg)`;
+    needleAnimId = requestAnimationFrame(animateNeedleLoop);
 }
 
 // Lógica do Afinador (baseada no código anterior)
@@ -96,6 +108,7 @@ async function iniciarAfinador() {
         statusMessage.className = "status-message";
 
         detectarFrequencia();
+        if (!needleAnimId) animateNeedleLoop();
     } catch (err) {
         console.error("Erro ao acessar o microfone:", err);
         statusMessage.textContent = "Erro: Permissão de microfone negada ou indisponível.";
@@ -108,6 +121,16 @@ function pararAfinador() {
     if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
+    }
+
+    if (needleAnimId) {
+        cancelAnimationFrame(needleAnimId);
+        needleAnimId = null;
+    }
+
+    if (needleAnimId) {
+        cancelAnimationFrame(needleAnimId);
+        needleAnimId = null;
     }
 
     if (mediaStream) {
@@ -255,6 +278,16 @@ window.addEventListener('load', () => {
 });
 window.addEventListener('hashchange', handleHashChange);
 
+startTunerBtn.addEventListener('click', iniciarAfinador);
+stopTunerBtn.addEventListener('click', pararAfinador);
+
+// Adiciona evento de clique para os links de navegação para atualizar a hash
+navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.hash = link.getAttribute('href');
+    });
+});
 startTunerBtn.addEventListener('click', iniciarAfinador);
 stopTunerBtn.addEventListener('click', pararAfinador);
 

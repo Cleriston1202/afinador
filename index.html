@@ -21,26 +21,42 @@
     <main>
         <section id="home" class="page active">
             <div class="container">
-                <h1>Bem-vindo ao AfinadorPRO!</h1>
-                <p>O seu afinador de violão online, simples e preciso.</p>
-                <p>Clique em "Afinador" no menu para começar a afinar seu instrumento.</p>
-                <img src="" alt="Violão" class="home-image">
-                <button class="btn-primary" onclick="window.location.hash='#afinador'">Começar a Afinar</button>
+                <div class="hero-card">
+                    <div class="hero-content">
+                        <h1>Bem-vindo ao <span class="brand">AfinadorPRO</span></h1>
+                        <p class="lead">Afinador de violão online — rápido, responsivo e fácil de usar.</p>
+                        <div class="hero-actions">
+                            <button class="btn-primary" onclick="window.location.hash='#afinador'">Começar a Afinar</button>
+                            <a class="btn-secondary" href="#afinador">Como funciona</a>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <img src="" alt="Violão" class="home-image">
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section id="afinador" class="page">
-            <div class="container afinador-container">
-                <h1>Afinador de Violão</h1>
-                <p class="description">Toque uma corda e veja a leitura em tempo real.</p>
-                
+        <section id="afinador" class="page afinador">
+            <div class="container tuner-card">
+                <div class="tuner-top">
+                    <div>
+                        <h2>Afinador de Violão</h2>
+                        <p class="description">Selecione uma corda, clique em iniciar e toque a corda para ver a leitura em tempo real.</p>
+                    </div>
+                    <div class="controls">
+                        <button id="start-tuner-btn" class="btn-primary">Iniciar</button>
+                        <button id="stop-tuner-btn" class="btn-secondary" disabled>Parar</button>
+                    </div>
+                </div>
+
                 <div class="afinador-display">
                     <p class="current-note-display" id="current-note">--</p>
                     <p class="current-freq-display" id="current-freq">0.00 Hz</p>
                 </div>
 
                 <div class="tuner-gauge">
-                    <div class="tuner-needle" id="tuner-needle"></div>
+                    <div class="tuner-needle" id="tuner-needle" aria-hidden="true"></div>
                     <div class="tuner-marks">
                         <span class="mark low">-30</span>
                         <span class="mark med">-15</span>
@@ -53,11 +69,8 @@
                 <div class="status-message" id="status-message">Aguardando áudio...</div>
 
                 <div class="target-notes">
-                    <p>Nota Alvo: <span id="target-note">--</span> (<span id="target-freq">0.00</span> Hz)</p>
+                    <p>Nota Alvo: <span id="target-note">--</span> — <span id="target-freq">0.00</span> Hz</p>
                 </div>
-
-                <button id="start-tuner-btn" class="btn-primary">Iniciar Afinador</button>
-                <button id="stop-tuner-btn" class="btn-secondary" disabled>Parar Afinador</button>
             </div>
         </section>
     </main>
