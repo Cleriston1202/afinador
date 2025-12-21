@@ -1,4 +1,5 @@
 /* JS extraído do index.html. Usa `defer` no HTML para carregar após DOM. */
+console.log('app.js loaded (v2)');
 const startBtn = document.getElementById('startBtn');
 const frequencyEl = document.getElementById('frequency');
 const noteEl = document.getElementById('note');
