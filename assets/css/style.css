@@ -34,6 +34,7 @@ body {
     justify-content: space-between;
     align-items: center;
     box-shadow: var(--shadow);
+    position: relative;
 }
 
 .navbar .logo {
@@ -41,6 +42,36 @@ body {
     font-weight: 700;
     color: white;
     text-decoration: none;
+}
+
+.hamburger {
+    display: none;
+    flex-direction: column;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.hamburger span {
+    width: 25px;
+    height: 3px;
+    background-color: white;
+    margin: 5px 0;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(10px, 10px);
+}
+
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
 }
 
 .nav-links {
@@ -174,20 +205,37 @@ img, svg {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .navbar {
-        flex-direction: column;
-        padding: 1rem;
+    .hamburger {
+        display: flex;
     }
     .nav-links {
-        margin-top: 1rem;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--primary-color);
+        flex-direction: column;
         width: 100%;
-        justify-content: space-around;
+        gap: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+    .nav-links.active {
+        max-height: 200px;
+        overflow: visible;
     }
     .nav-links li {
         margin: 0;
+        padding: 1rem 2rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
     }
-    .page {
-        padding: 2rem 1rem;
+    .nav-links a {
+        padding: 0;
+    }
+    .navbar {
+        flex-direction: row;
+        padding: 1rem;
     }
 }
 
@@ -195,8 +243,12 @@ img, svg {
     html, body { overflow-x: hidden; }
     .navbar { padding: 0.6rem 0.75rem; }
     .navbar .logo { font-size: 1.4rem; }
-    .nav-links { width: 100%; justify-content: space-around; }
-    .nav-links a { font-size: 0.95rem; padding: 0.25rem 0; }
+    .hamburger {
+        display: flex;
+    }
+    .nav-links { width: 100%; }
+    .nav-links li { padding: 0.75rem 1.5rem; }
+    .nav-links a { font-size: 0.95rem; padding: 0; }
     .page { padding: 1rem; border-radius: 10px; }
     .btn-primary, .btn-secondary { padding: 0.6rem 1rem; font-size: 1rem; }
 }

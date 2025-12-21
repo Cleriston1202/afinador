@@ -3,6 +3,8 @@
 const navLinks = document.querySelectorAll('.nav-links a');
 const pages = document.querySelectorAll('.page');
 const homeImage = document.querySelector('.home-image');
+const hamburgerBtn = document.getElementById('hamburger-menu');
+const navLinksContainer = document.getElementById('nav-links');
 
 function showPage(id) {
     pages.forEach(page => {
@@ -16,6 +18,12 @@ function showPage(id) {
             link.classList.add('active');
         }
     });
+
+    // Fechar menu ao clicar em um link
+    if (hamburgerBtn.classList.contains('active')) {
+        hamburgerBtn.classList.remove('active');
+        navLinksContainer.classList.remove('active');
+    }
 }
 
 function handleHashChange() {
@@ -25,6 +33,14 @@ function handleHashChange() {
     } else {
         showPage('home');
     }
+}
+
+// Hamburger Menu Toggle
+if (hamburgerBtn) {
+    hamburgerBtn.addEventListener('click', () => {
+        hamburgerBtn.classList.toggle('active');
+        navLinksContainer.classList.toggle('active');
+    });
 }
 
 // Event Listeners
