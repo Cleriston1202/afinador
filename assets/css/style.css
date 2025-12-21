@@ -77,9 +77,10 @@ main {
 .page {
     display: none;
     width: 100%;
-    max-width: 800px;
+    max-width: 1000px;
+    margin: 1rem auto;
     text-align: center;
-    padding: 3rem 2rem;
+    padding: 2.5rem 2rem;
     background-color: var(--card-background);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
@@ -104,6 +105,8 @@ main {
 
 .container {
     padding: 1rem;
+    max-width: 1100px;
+    margin: 0 auto;
 }
 
 .home-image {
@@ -355,4 +358,28 @@ main {
         height: 80px;
     }
     .hero-card { grid-template-columns: 1fr; }
+}
+
+/* Notas (Fretboard) */
+.notas-card { text-align: center; padding: 1.25rem; }
+.notas-top { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; }
+.notes-controls { gap:0.5rem; }
+.notas-visual { display:flex; justify-content:center; align-items:center; }
+#fretboard { width: 100%; max-width: 760px; height: auto; }
+.pin { transition: all 240ms ease; cursor: default; }
+.pin.active { opacity: 1 !important; fill: #ffeb3b; r:14; filter: drop-shadow(0 6px 12px rgba(255,235,59,0.25)); }
+
+/* animação de pulso para destaque */
+.pin.active::after { content: ''; }
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.95; }
+    50% { transform: scale(1.4); opacity: 0.6; }
+    100% { transform: scale(1); opacity: 0.95; }
+}
+.pin.active { animation: pulse 900ms ease-in-out infinite; }
+
+/* Ajustes para controles em telas pequenas */
+@media (max-width: 520px) {
+    .notas-top { flex-direction: column; align-items: flex-start; }
+    .notes-controls { width: 100%; display:flex; justify-content:flex-start; gap:0.5rem; }
 }

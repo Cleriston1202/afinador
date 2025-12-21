@@ -275,6 +275,7 @@ window.addEventListener('load', () => {
     // Define uma imagem de violão local (substitui placeholder externo)
     homeImage.src = 'assets/images/violao.svg';
     handleHashChange(); // Exibe a página correta ao carregar
+    initNotasSection();
 });
 window.addEventListener('hashchange', handleHashChange);
 
@@ -288,13 +289,85 @@ navLinks.forEach(link => {
         window.location.hash = link.getAttribute('href');
     });
 });
-startTunerBtn.addEventListener('click', iniciarAfinador);
-stopTunerBtn.addEventListener('click', pararAfinador);
 
-// Adiciona evento de clique para os links de navegação para atualizar a hash
-navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.location.hash = link.getAttribute('href');
-    });
-});
+/* ====== Seção Notas: lógica para animar pins no fretboard ====== */
+const playNotesBtn = document.getElementById('play-notes-btn');
+const stopNotesBtn = document.getElementById('stop-notes-btn');
+const prevNoteBtn = document.getElementById('prev-note-btn');
+const nextNoteBtn = document.getElementById('next-note-btn');
+
+let notesSequence = [];
+let notesIndex = 0;
+let notesIntervalId = null;
+const NOTES_STEP_MS = 1300;
+
+function buildDefaultSequence() {
+    // Sequência simples: casas 0-4 das 6 cordas (ordem E2->E4)
+    const strings = ['E2','A2','D3','G3','B3','E4'];
+    const seq = [];
+    for (let s = 0; s < strings.length; s++) {
+        for (let fret = 0; fret <= 4; fret++) {
+            seq.push(`${strings[s]}-${fret}`);
+        }
+    }
+    return seq;
+}
+
+function clearActivePins() {
+    document.querySelectorAll('#pins .pin.active').forEach(el => el.classList.remove('active'));
+}
+
+function highlightPin(idSuffix) {
+    clearActivePins();
+    const el = document.getElementById(`pin-${idSuffix}`);
+    if (el) el.classList.add('active');
+}
+
+function playNotesSequence() {
+    if (!notesSequence.length) notesSequence = buildDefaultSequence();
+    playNotesBtn.disabled = true;
+    stopNotesBtn.disabled = false;
+    notesIndex = 0;
+    highlightPin(notesSequence[notesIndex]);
+    notesIntervalId = setInterval(() => {
+        notesIndex = (notesIndex + 1) % notesSequence.length;
+        highlightPin(notesSequence[notesIndex]);
+    }, NOTES_STEP_MS);
+}
+
+function stopNotesSequence() {
+    playNotesBtn.disabled = false;
+    stopNotesBtn.disabled = true;
+    if (notesIntervalId) {
+        clearInterval(notesIntervalId);
+        notesIntervalId = null;
+    }
+    clearActivePins();
+}
+
+function nextNote() {
+    if (!notesSequence.length) notesSequence = buildDefaultSequence();
+    notesIndex = (notesIndex + 1) % notesSequence.length;
+    highlightPin(notesSequence[notesIndex]);
+}
+
+function prevNote() {
+    if (!notesSequence.length) notesSequence = buildDefaultSequence();
+    notesIndex = (notesIndex - 1 + notesSequence.length) % notesSequence.length;
+    highlightPin(notesSequence[notesIndex]);
+}
+
+function initNotasSection() {
+    // garante que os elementos existem (quando a seção foi injetada no HTML)
+    if (!document.getElementById('fretboard')) return;
+    notesSequence = buildDefaultSequence();
+    // rebind controles (eventos podem ser nulos se chamados antes de injeção)
+    const playBtn = document.getElementById('play-notes-btn');
+    const stopBtn = document.getElementById('stop-notes-btn');
+    const prevBtn = document.getElementById('prev-note-btn');
+    const nextBtn = document.getElementById('next-note-btn');
+    if (playBtn) playBtn.addEventListener('click', playNotesSequence);
+    if (stopBtn) stopBtn.addEventListener('click', stopNotesSequence);
+    if (prevBtn) prevBtn.addEventListener('click', prevNote);
+    if (nextBtn) nextBtn.addEventListener('click', nextNote);
+}
