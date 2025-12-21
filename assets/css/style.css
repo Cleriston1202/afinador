@@ -186,8 +186,8 @@ img, svg { max-width: 100%; height: auto; display: block; }
 /* Controls area */
 .controls { display:flex; gap:0.5rem; align-items:center; }
 
-.tuner-card { background: linear-gradient(180deg,#fff,#fbfbfb); border-radius:14px; padding:1.5rem; box-shadow: var(--shadow); width:100%; }
-.tuner-top { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; }
+.tuner-card { background: linear-gradient(180deg,#fff,#fbfbfb); border-radius:14px; padding:1.5rem; box-shadow: var(--shadow); width:100%; max-width:900px; }
+.tuner-top { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; flex-wrap:wrap; }
 
 .btn-primary { background: linear-gradient(90deg, var(--primary-color), #43a047); box-shadow: 0 6px 18px rgba(76,175,80,0.12); }
 .btn-secondary { background: linear-gradient(90deg, var(--secondary-color), #3949ab); box-shadow: 0 6px 18px rgba(63,81,181,0.08); }
@@ -243,6 +243,10 @@ img, svg { max-width: 100%; height: auto; display: block; }
     box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
     border: 2px solid #ddd;
 }
+
+/* seletor de nota no afinador */
+.note-select-label { margin-left: 0.5rem; color: #333; font-weight:700; }
+#note-select { padding: 0.45rem 0.6rem; border-radius: 8px; border: 1px solid rgba(0,0,0,0.08); margin-left: 0.5rem; }
 
 .tuner-marks {
     position: absolute;
@@ -382,6 +386,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
     .notas-top { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
     .notes-controls { width: 100%; display:flex; gap:0.5rem; }
     #fretboard { max-width: 100%; height: auto; }
+    #note-select { width: 100%; margin-left: 0; }
 }
 
 /* Notas (Fretboard) */

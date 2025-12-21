@@ -295,6 +295,7 @@ const playNotesBtn = document.getElementById('play-notes-btn');
 const stopNotesBtn = document.getElementById('stop-notes-btn');
 const prevNoteBtn = document.getElementById('prev-note-btn');
 const nextNoteBtn = document.getElementById('next-note-btn');
+const noteSelect = document.getElementById('note-select');
 
 let notesSequence = [];
 let notesIndex = 0;
@@ -321,6 +322,14 @@ function highlightPin(idSuffix) {
     clearActivePins();
     const el = document.getElementById(`pin-${idSuffix}`);
     if (el) el.classList.add('active');
+}
+
+function highlightPositionsForNote(noteName) {
+    clearActivePins();
+    if (!noteName) return;
+    // seleciona todos os pins cuja id começa com `pin-<noteName>-`
+    const selector = `#pins circle[id^="pin-${noteName}-"]`;
+    document.querySelectorAll(selector).forEach(el => el.classList.add('active'));
 }
 
 function playNotesSequence() {
@@ -388,6 +397,14 @@ function initNotasSection() {
     if (chordSelect) chordSelect.addEventListener('change', () => {
         const chord = chordSelect.value;
         if (chordInfo) chordInfo.textContent = chord ? `Acorde selecionado: ${chord}` : '';
+    });
+}
+
+// Quando o usuário seleciona uma nota no afinador, destaca posições no fretboard
+if (noteSelect) {
+    noteSelect.addEventListener('change', () => {
+        const v = noteSelect.value;
+        highlightPositionsForNote(v);
     });
 }
 
