@@ -136,8 +136,10 @@ function showChordMajorMinor(note, type) {
     const strings = ['E2','A2','D3','G3','B3','E4'];
     document.querySelectorAll('#pins .pin').forEach(el => el.classList.remove('chord-muted'));
     
-    // Remove textos anteriores de numeração de dedos
+    // Remover rótulos e barras anteriores (textos, grupos e retângulos de pestana)
     document.querySelectorAll('#pins text').forEach(el => el.remove());
+    document.querySelectorAll('#pins .pin-finger-group').forEach(el => el.remove());
+    document.querySelectorAll('#pins .barre-rect').forEach(el => el.remove());
     
     // Verificar primeiro se há acordes com barré (múltiplas cordas na mesma casa)
     const fretCounts = {};
