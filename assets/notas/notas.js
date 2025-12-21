@@ -136,10 +136,11 @@ function showChordMajorMinor(note, type) {
     const strings = ['E2','A2','D3','G3','B3','E4'];
     document.querySelectorAll('#pins .pin').forEach(el => el.classList.remove('chord-muted'));
     
-    // Remover rótulos e barras anteriores (textos, grupos e retângulos de pestana)
+    // Remover rótulos e barras anteriores (textos, grupos, retângulos e traços de pestana)
     document.querySelectorAll('#pins text').forEach(el => el.remove());
     document.querySelectorAll('#pins .pin-finger-group').forEach(el => el.remove());
     document.querySelectorAll('#pins .barre-rect').forEach(el => el.remove());
+    document.querySelectorAll('#pins .barre-top-line').forEach(el => el.remove());
     
     // Verificar primeiro se há acordes com barré (múltiplas cordas na mesma casa)
     const fretCounts = {};
@@ -239,6 +240,18 @@ function showChordMajorMinor(note, type) {
                     label.setAttribute('font-weight', '700');
                     label.textContent = fingerNum || '';
                     pinsGroup.appendChild(label);
+
+                        // traço fino acima das cordas para destacar o barré (cobre a largura da barra)
+                        const topLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        const lineY = barY - Math.max(8, barHeight/2) - 4; // posicione ligeiramente acima da barra
+                        topLine.setAttribute('x1', barX);
+                        topLine.setAttribute('x2', barX + barW);
+                        topLine.setAttribute('y1', lineY);
+                        topLine.setAttribute('y2', lineY);
+                        topLine.setAttribute('class', 'barre-top-line');
+                        topLine.setAttribute('stroke-width', '3');
+                        topLine.setAttribute('stroke-linecap', 'round');
+                        pinsGroup.appendChild(topLine);
                 }
                 // marcar visualmente os pins individuais tamb9m
                 el.classList.add('barre-chord');
