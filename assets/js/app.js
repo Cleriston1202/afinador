@@ -14,6 +14,7 @@ const stringInfo = document.getElementById('stringInfo');
 const stringInfoContent = document.getElementById('stringInfoContent');
 const tunedLamp = document.getElementById('tunedLamp');
 const lampLabel = document.getElementById('lampLabel');
+const autoDetectInfo = document.getElementById('autoDetectInfo');
 
 let audioContext;
 let analyser;
@@ -35,10 +36,17 @@ const NOTES = [
   { note: 'E', fullName: 'Mi', freq: 329.63, label: 'Mi (1ª)', position: '1ª corda (mais fina)', octave: 'Mi4', description: 'A corda mais aguda do violão, também conhecida como 1ª corda' }
 ];
 
-// Filtragem e detecção
+// Filtragem e detecção com configs otimizadas
 const MIN_DETECT_FREQ = 70; // Hz - mínimo plausível para corda de violão
 const MAX_DETECT_FREQ = 1000; // Hz - máximo plausível (inclui harmônicos)
-const RMS_THRESHOLD = 0.015; // limiar RMS para considerar som válido
+const RMS_THRESHOLD = 0.008; // limiar RMS reduzido para melhor sensibilidade
+const AUTO_DETECT_ENABLED = true; // detectar cordas automaticamente
+const AUTO_DETECT_CERTAINTY = 0.85; // confiança mínima para auto-detectar
+const MAX_HISTORY_EXTENDED = 16; // histórico maior para melhor suavização
+
+let autoDetectedString = null;
+let autoDetectConfidence = 0;
+let lastAutoDetectTime = 0;
 
 function setLamp(state, text) {
   tunedLamp.className = 'lamp ' + state;
@@ -48,13 +56,19 @@ function setLamp(state, text) {
 function addToHistory(value) {
   if (value === -1) return;
   freqHistory.push(value);
-  if (freqHistory.length > MAX_HISTORY) freqHistory.shift();
+  if (freqHistory.length > MAX_HISTORY_EXTENDED) freqHistory.shift();
 }
 
 function smoothedFreq() {
   if (!freqHistory.length) return -1;
-  const sum = freqHistory.reduce((a, b) => a + b, 0);
-  return sum / freqHistory.length;
+  // Média ponderada: últimas leituras têm maior peso
+  let sum = 0, weightSum = 0;
+  freqHistory.forEach((freq, idx) => {
+    const weight = 1 + (idx / freqHistory.length);
+    sum += freq * weight;
+    weightSum += weight;
+  });
+  return sum / weightSum;
 }
 
 // Criar botões para cada corda
@@ -93,6 +107,7 @@ function selectString(index) {
   tuningIndicator.style.display = 'none';
   setLamp('idle', 'Pronto');
   lastFrequency = null;
+  autoDetectInfo.style.display = 'none';
 }
 
 startBtn.addEventListener('click', async () => {
@@ -161,12 +176,26 @@ function detectPitch() {
     );
   }
 
-  if (smoothFrequency !== -1 && isGuitarLike && selectedString) {
+  // Tentar auto-detectar corda se nenhuma estiver selecionada
+  let currentString = selectedString;
+  if (!currentString && smoothFrequency !== -1 && isGuitarLike) {
+    if (autoDetectString(smoothFrequency)) {
+      currentString = autoDetectedString;
+      // Auto-seleciona a corda detectada visualmente
+      const stringIndex = NOTES.findIndex(n => n.freq === autoDetectedString.freq && n.note === autoDetectedString.note && n.octave === autoDetectedString.octave);
+      if (stringIndex !== -1) {
+        selectString(stringIndex);
+        autoDetectInfo.style.display = 'block';
+      }
+    }
+  }
+
+  if (smoothFrequency !== -1 && isGuitarLike && currentString) {
     frequencyEl.textContent = smoothFrequency.toFixed(2) + ' Hz';
-    noteEl.textContent = selectedString.note;
-    noteFullNameEl.textContent = selectedString.fullName + ' - ' + selectedString.position;
+    noteEl.textContent = currentString.note;
+    noteFullNameEl.textContent = currentString.fullName + ' - ' + currentString.position;
     tuningIndicator.style.display = 'flex';
-    const targetFreqVal = selectedString.freq;
+    const targetFreqVal = currentString.freq;
     const diff = smoothFrequency - targetFreqVal;
     const cents = Math.round(1200 * Math.log2(smoothFrequency / targetFreqVal));
     const absCents = Math.abs(cents);
@@ -249,7 +278,7 @@ function detectPitch() {
         statusEl.className = 'status very-high';
       }
     }
-  } else if (selectedString) {
+  } else if (currentString) {
     statusEl.textContent = 'Aguardando som...';
     statusEl.className = 'status';
     tuningIndicator.style.display = 'none';
@@ -258,13 +287,53 @@ function detectPitch() {
     accuracyText.textContent = '';
     setLamp('idle', 'Aguardando');
     lastFrequency = null;
-    freqHistory = [];
+  } else if (!currentString && smoothFrequency !== -1 && isGuitarLike) {
+    // Som detectado mas corda ainda não identificada
+    statusEl.textContent = 'Som detectado... Identificando corda...';
+    statusEl.className = 'status';
+    frequencyEl.textContent = smoothFrequency.toFixed(2) + ' Hz';
   }
   requestAnimationFrame(detectPitch);
 }
 
 function getClosestString(freq) {
-  return NOTES.reduce((prev, curr) => Math.abs(curr.freq - freq) < Math.abs(prev.freq - freq) ? curr : prev);
+  // Encontra a corda mais próxima com confiança baseada na distância
+  let closest = NOTES[0];
+  let minDistance = Math.abs(NOTES[0].freq - freq);
+  
+  for (let i = 1; i < NOTES.length; i++) {
+    const distance = Math.abs(NOTES[i].freq - freq);
+    if (distance < minDistance) {
+      minDistance = distance;
+      closest = NOTES[i];
+    }
+  }
+  
+  // Calcula confiança (100% se perfeito, diminui com distância)
+  const cents = Math.abs(1200 * Math.log2(freq / closest.freq));
+  const confidence = Math.max(0, Math.min(1, 1 - (cents / 200))); // range aceitável: ±200 cents
+  
+  return { string: closest, distance: minDistance, confidence: confidence, cents: cents };
+}
+
+function autoDetectString(freq) {
+  if (!AUTO_DETECT_ENABLED || !freq || freq === -1) return false;
+  
+  const detection = getClosestString(freq);
+  const now = Date.now();
+  
+  // Só auto-detecta se confiança alta e frequência é razoável
+  if (detection.confidence >= AUTO_DETECT_CERTAINTY && detection.cents < 150) {
+    // Evita trocar de corda muito frequentemente (aguarda 500ms)
+    if (now - lastAutoDetectTime > 500) {
+      autoDetectedString = detection.string;
+      autoDetectConfidence = detection.confidence;
+      lastAutoDetectTime = now;
+      return true;
+    }
+  }
+  
+  return false;
 }
 
 function autoCorrelate(buffer, sampleRate) {
@@ -273,23 +342,52 @@ function autoCorrelate(buffer, sampleRate) {
   for (let i = 0; i < size; i++) rms += buffer[i] * buffer[i];
   rms = Math.sqrt(rms / size);
   if (rms < RMS_THRESHOLD) return -1;
+  
+  // Limpar picos e silêncios nas extremidades
   let r1 = 0, r2 = size - 1;
   const threshold = 0.2;
   for (let i = 0; i < size / 2; i++) { if (Math.abs(buffer[i]) < threshold) { r1 = i; break; } }
   for (let i = 1; i < size / 2; i++) { if (Math.abs(buffer[size - i]) < threshold) { r2 = size - i; break; } }
   buffer = buffer.slice(r1, r2);
   size = buffer.length;
+  
+  // Autocorrelação com refinamento
   const c = new Array(size).fill(0);
   for (let i = 0; i < size; i++) {
     for (let j = 0; j < size - i; j++) {
       c[i] += buffer[j] * buffer[j + i];
     }
   }
+  
+  // Encontra o primeiro pico significativo
   let d = 0;
   while (c[d] > c[d + 1]) d++;
+  
+  // Busca por máximo com melhor resolução
   let maxval = -1, maxpos = -1;
-  for (let i = d; i < size; i++) {
-    if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
+  for (let i = d; i < Math.min(size, d + size / 4); i++) {
+    if (c[i] > maxval) { 
+      maxval = c[i]; 
+      maxpos = i; 
+    }
   }
-  return sampleRate / maxpos;
+  
+  if (maxpos < d) return -1;
+  
+  // Interpolação parabólica para melhor precisão
+  if (maxpos > 0 && maxpos < c.length - 1) {
+    const y1 = c[maxpos - 1];
+    const y2 = c[maxpos];
+    const y3 = c[maxpos + 1];
+    const a = (y3 - 2 * y2 + y1) / 2;
+    const b = (y3 - y1) / 2;
+    
+    if (a !== 0) {
+      const xOffset = -b / (2 * a);
+      maxpos = maxpos + xOffset;
+    }
+  }
+  
+  const frequency = sampleRate / maxpos;
+  return frequency;
 }

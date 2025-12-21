@@ -17,9 +17,13 @@
       <a href="#">Sobre</a>
     </nav>
     <h1>🎸 Afinador de Violão</h1>
-    <p>Selecione uma corda e use o microfone para afinar</p>
+    <p>Toque uma corda para afinar (detecção automática ou selecione manualmente)</p>
 
     <div class="strings-container" id="stringsContainer"></div>
+    
+    <div class="auto-detect-info" id="autoDetectInfo" style="display: none;">
+      <span class="auto-detect-badge">🎵 Corda detectada automaticamente</span>
+    </div>
 
     <div class="freq" id="frequency">-- Hz</div>
     <div class="note" id="note">--</div>

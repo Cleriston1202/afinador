@@ -178,6 +178,30 @@ p { margin-top: 0; margin-bottom: 8px; }
 
 .strings-container { margin-top: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
 
+.auto-detect-info {
+  margin: 10px 0;
+  padding: 8px 12px;
+  background: rgba(207, 207, 207, 0.1);
+  border-radius: 6px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.auto-detect-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, var(--mono-300), var(--mono-200));
+  color: var(--mono-900);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
 .string-btn { padding: 14px 10px; font-size: 1.05rem; font-weight: bold; border-radius: 12px; border: 2px solid transparent; cursor: pointer; background: linear-gradient(135deg, var(--mono-700), var(--mono-600)); color: var(--accent); transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.18); text-align: center; }
 
 .string-btn:active, .string-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.25); }
@@ -305,6 +329,7 @@ p { margin-top: 0; margin-bottom: 8px; }
   .progress-info { font-size: 0.65rem; }
   .start-btn { padding: 10px; font-size: 0.85rem; }
   .menu a { padding: 4px 6px; font-size: 0.75rem; }
+  .auto-detect-badge { font-size: 0.75rem; }
 }
 
 /* Accessibility: larger touch targets on small devices */
