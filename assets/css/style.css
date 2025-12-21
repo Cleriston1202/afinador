@@ -1,3 +1,4 @@
+/* Global Styles */
 :root {
     --primary-color: #4CAF50; /* Verde */
     --secondary-color: #3f51b5; /* Azul */
@@ -110,21 +111,14 @@ main {
     max-width: 1100px;
     margin: 0 auto;
 }
-img, svg { max-width: 100%; height: auto; display: block; }
 
-.home-image {
-    max-width: 80%;
-    height: auto;
-    margin: 2rem 0;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
+img, svg { 
+    max-width: 100%; 
+    height: auto; 
+    display: block; 
 }
 
-.home-image {
-    border: 4px solid rgba(255,255,255,0.08);
-    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-}
-
+/* Buttons */
 .btn-primary, .btn-secondary {
     display: inline-block;
     padding: 1rem 2rem;
@@ -139,20 +133,22 @@ img, svg { max-width: 100%; height: auto; display: block; }
 }
 
 .btn-primary {
-    background-color: var(--primary-color);
+    background: linear-gradient(90deg, var(--primary-color), #43a047);
+    box-shadow: 0 6px 18px rgba(76,175,80,0.12);
 }
 
 .btn-primary:hover {
-    background-color: #43a047; /* Tom mais escuro */
+    background-color: #43a047;
     transform: translateY(-2px);
 }
 
 .btn-secondary {
-    background-color: var(--secondary-color);
+    background: linear-gradient(90deg, var(--secondary-color), #3949ab);
+    box-shadow: 0 6px 18px rgba(63,81,181,0.08);
 }
 
 .btn-secondary:hover {
-    background-color: #3949ab; /* Tom mais escuro */
+    background-color: #3949ab;
     transform: translateY(-2px);
 }
 
@@ -162,176 +158,21 @@ img, svg { max-width: 100%; height: auto; display: block; }
     transform: none;
 }
 
-/* Afinador Specific Styles */
-.afinador-container h1 {
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-/* Hero card */
-.hero-card {
-    display: grid;
-    grid-template-columns: 1fr 360px;
-    gap: 1.5rem;
-    align-items: center;
-}
-.hero-content h1 { font-size: 2.1rem; margin-bottom: 0.25rem; }
-.brand { color: var(--primary-color); }
-.lead { color: #555; margin-bottom: 1rem; }
-.hero-actions { display: flex; gap: 0.75rem; align-items: center; }
-
-.hero-visual { display:flex; justify-content:center; align-items:center; }
-.hero-visual .home-image { max-width: 100%; border-radius: 12px; }
-
 /* Controls area */
-.controls { display:flex; gap:0.5rem; align-items:center; }
-
-.tuner-card { background: linear-gradient(180deg,#fff,#fbfbfb); border-radius:14px; padding:1.5rem; box-shadow: var(--shadow); width:100%; max-width:900px; }
-.tuner-top { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; flex-wrap:wrap; }
-
-.btn-primary { background: linear-gradient(90deg, var(--primary-color), #43a047); box-shadow: 0 6px 18px rgba(76,175,80,0.12); }
-.btn-secondary { background: linear-gradient(90deg, var(--secondary-color), #3949ab); box-shadow: 0 6px 18px rgba(63,81,181,0.08); }
-
-.afinador-display { display:flex; flex-direction:column; align-items:center; gap:0.25rem; margin: 1rem 0; }
-.current-note-display { font-size:4.5rem; font-weight:700; color:var(--text-color); }
-.current-freq-display { color:#666; font-size:1.25rem; }
-
-.status-message { font-size:1rem; padding:0.6rem 1rem; border-radius:8px; background: rgba(0,0,0,0.02); display:inline-block; margin-top:0.75rem; }
-
-/* Tuning bar fallback for small screens */
-.tuning-bar { height:10px; background:#eee; border-radius:6px; width:80%; margin:0.75rem auto; }
-
-
-.tuner-card {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    align-items: center;
-    padding: 1.5rem;
+.controls { 
+    display: flex; 
+    gap: 0.5rem; 
+    align-items: center; 
 }
 
-.afinador-container .description {
+/* Description text */
+.description {
     font-size: 1.1rem;
     color: #666;
     margin-bottom: 2rem;
 }
 
-.afinador-display {
-    margin: 2rem 0;
-    font-weight: 700;
-}
-
-.current-note-display {
-    font-size: 5rem;
-    color: var(--text-color);
-    margin-bottom: 0.5rem;
-}
-
-.current-freq-display {
-    font-size: 2rem;
-    color: #666;
-}
-
-.tuner-gauge {
-    width: 250px;
-    height: 125px;
-    margin: 2rem auto;
-    border-radius: 125px 125px 0 0;
-    background-color: #eee;
-    position: relative;
-    overflow: hidden;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
-    border: 2px solid #ddd;
-}
-
-/* seletor de nota no afinador */
-.note-select-label { margin-left: 0.5rem; color: #333; font-weight:700; }
-#note-select { padding: 0.45rem 0.6rem; border-radius: 8px; border: 1px solid rgba(0,0,0,0.08); margin-left: 0.5rem; }
-
-.tuner-marks {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    padding: 0 10px; /* Ajuste para as marcas */
-    pointer-events: none;
-}
-
-.tuner-marks .mark {
-    position: absolute; /* Para posicionar individualmente */
-    transform-origin: bottom center;
-    font-size: 0.9rem;
-    color: #666;
-    font-weight: bold;
-    bottom: 5px;
-}
-
-.tuner-marks .mark.low { left: 0%; transform: translateX(-50%) rotate(-60deg); }
-.tuner-marks .mark.med:nth-of-type(2) { left: 25%; transform: translateX(-50%) rotate(-30deg); }
-.tuner-marks .mark.zero { left: 50%; transform: translateX(-50%) rotate(0deg); color: var(--primary-color); font-size: 1.2rem; }
-.tuner-marks .mark.med:nth-of-type(4) { left: 75%; transform: translateX(-50%) rotate(30deg); }
-.tuner-marks .mark.high { left: 100%; transform: translateX(-50%) rotate(60deg); }
-
-
-.tuner-needle {
-    width: 2px;
-    height: 100px;
-    background-color: var(--secondary-color);
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform-origin: bottom center;
-    transform: translateX(-50%) rotate(0deg);
-    transition: none; /* Animação controlada via JS para suavização precisa */
-    box-shadow: 0 0 5px rgba(0,0,0,0.2);
-    z-index: 10;
-    border-radius: 2px 2px 0 0;
-}
-
-/* Pequenos aprimoramentos visuais */
-.status-message {
-    background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    box-shadow: inset 0 -2px 6px rgba(0,0,0,0.03);
-}
-
-.status-message {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin: 2rem 0;
-    color: #333;
-}
-
-.status-message.tuned {
-    color: var(--primary-color);
-}
-
-.status-message.flat {
-    color: #e67e22; /* Laranja */
-}
-
-.status-message.sharp {
-    color: #e74c3c; /* Vermelho */
-}
-
-.target-notes {
-    margin-top: 1.5rem;
-    font-size: 1.1rem;
-    color: #555;
-}
-
-.target-notes span {
-    font-weight: 700;
-    color: var(--secondary-color);
-}
-
-
-/* Responsividade */
+/* Responsive */
 @media (max-width: 768px) {
     .navbar {
         flex-direction: column;
@@ -348,26 +189,8 @@ img, svg { max-width: 100%; height: auto; display: block; }
     .page {
         padding: 2rem 1rem;
     }
-    .home-image {
-        max-width: 90%;
-    }
-    .current-note-display {
-        font-size: 4rem;
-    }
-    .current-freq-display {
-        font-size: 1.5rem;
-    }
-    .tuner-gauge {
-        width: 200px;
-        height: 100px;
-    }
-    .tuner-needle {
-        height: 80px;
-    }
-    .hero-card { grid-template-columns: 1fr; }
 }
 
-/* Ajustes adicionais para telas muito pequenas (celulares) */
 @media (max-width: 420px) {
     html, body { overflow-x: hidden; }
     .navbar { padding: 0.6rem 0.75rem; }
@@ -375,42 +198,5 @@ img, svg { max-width: 100%; height: auto; display: block; }
     .nav-links { width: 100%; justify-content: space-around; }
     .nav-links a { font-size: 0.95rem; padding: 0.25rem 0; }
     .page { padding: 1rem; border-radius: 10px; }
-    .hero-content h1 { font-size: 1.6rem; }
-    .lead { font-size: 0.95rem; }
-    .hero-actions { flex-direction: column; align-items: stretch; }
     .btn-primary, .btn-secondary { padding: 0.6rem 1rem; font-size: 1rem; }
-    .current-note-display { font-size: 3rem; }
-    .current-freq-display { font-size: 1.1rem; }
-    .tuner-gauge { width: 160px; height: 80px; }
-    .tuner-needle { height: 64px; }
-    .notas-top { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-    .notes-controls { width: 100%; display:flex; gap:0.5rem; }
-    #fretboard { max-width: 100%; height: auto; }
-    #note-select { width: 100%; margin-left: 0; }
 }
-
-/* Notas (Fretboard) */
-.notas-card { text-align: center; padding: 1.25rem; }
-.notas-top { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; }
-.notes-controls { gap:0.5rem; }
-.notas-visual { display:flex; justify-content:center; align-items:center; }
-#fretboard { width: 100%; max-width: 760px; height: auto; }
-.pin { transition: transform 120ms ease, opacity 120ms ease; cursor: default; transform-origin: center center; opacity: 0.9; }
-.pin.active { opacity: 1 !important; fill: #ffeb3b; transform: scale(1.25); filter: drop-shadow(0 6px 12px rgba(255,235,59,0.25)); }
-
-/* Removida animação para destacar posições (apenas destaque estático) */
-
-/* Ajustes para controles em telas pequenas */
-@media (max-width: 520px) {
-    .notas-top { flex-direction: column; align-items: flex-start; }
-    .notes-controls { width: 100%; display:flex; justify-content:flex-start; gap:0.5rem; }
-}
-
-/* estilos de controles de acorde */
-.chord-controls { margin-top: 1rem; display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }
-.chord-controls label { font-weight:700; color: #fff; margin-right: 0.25rem; }
-.chord-controls select { padding: 0.4rem 0.6rem; border-radius: 6px; border: none; }
-.chord-controls .chord-info { margin-left: 0.5rem; color: #fff; font-weight:700; }
-
-/* estilo do indicador de cordas mudas */
-.chord-muted { opacity: 0.25; }

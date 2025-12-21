@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Afinador de Violão</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/home/home.css">
+    <link rel="stylesheet" href="assets/tuner/tuner.css">
+    <link rel="stylesheet" href="assets/notas/notas.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -126,6 +129,46 @@
 
                 <div class="notes-legend">
                     <p>Legenda: destaque animado mostra a posição da nota no braço.</p>
+                    
+                    <!-- Configurador de notas -->
+                    <div class="note-configurator">
+                        <h3>Explorar Notas</h3>
+                        <div class="config-controls">
+                            <div class="config-group">
+                                <label for="string-select">Corda:</label>
+                                <select id="string-select">
+                                    <option value="">-- Escolher --</option>
+                                    <option value="E2">E2 (Mi baixo)</option>
+                                    <option value="A2">A2 (Lá)</option>
+                                    <option value="D3">D3 (Ré)</option>
+                                    <option value="G3">G3 (Sol)</option>
+                                    <option value="B3">B3 (Si)</option>
+                                    <option value="E4">E4 (Mi agudo)</option>
+                                </select>
+                            </div>
+                            <div class="config-group">
+                                <label for="fret-select">Casa:</label>
+                                <select id="fret-select">
+                                    <option value="">-- Escolher --</option>
+                                    <option value="0">0 (Corda aberta)</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                </select>
+                            </div>
+                            <button id="show-note-position-btn" class="btn-secondary">Mostrar Posição</button>
+                        </div>
+                        <div id="note-info" class="note-info"></div>
+                    </div>
                     <div class="chord-controls">
                         <label for="chord-select">Selecionar Acorde:</label>
                         <select id="chord-select">
@@ -154,16 +197,6 @@
                     <div class="controls">
                         <button id="start-tuner-btn" class="btn-primary">Iniciar</button>
                         <button id="stop-tuner-btn" class="btn-secondary" disabled>Parar</button>
-                        <label for="note-select" class="note-select-label">Mostrar nota:</label>
-                        <select id="note-select">
-                            <option value="">-- Escolher --</option>
-                            <option value="E2">E2 (Mi baixo)</option>
-                            <option value="A2">A2 (Lá)</option>
-                            <option value="D3">D3 (Ré)</option>
-                            <option value="G3">G3 (Sol)</option>
-                            <option value="B3">B3 (Si)</option>
-                            <option value="E4">E4 (Mi agudo)</option>
-                        </select>
                     </div>
                 </div>
 
@@ -193,5 +226,7 @@
     </main>
 
     <script src="assets/js/app.js"></script>
+    <script src="assets/tuner/tuner.js"></script>
+    <script src="assets/notas/notas.js"></script>
 </body>
 </html>

@@ -1,0 +1,152 @@
+/* Notas (Fretboard) Styles */
+.notas-card { 
+    text-align: center; 
+    padding: 1.25rem; 
+}
+
+.notas-top { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    gap: 1rem; 
+    margin-bottom: 1rem; 
+}
+
+.notes-controls { 
+    gap: 0.5rem; 
+}
+
+.notas-visual { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+}
+
+#fretboard { 
+    width: 100%; 
+    max-width: 760px; 
+    height: auto; 
+}
+
+.pin { 
+    transition: transform 120ms ease, opacity 120ms ease; 
+    cursor: default; 
+    transform-origin: center center; 
+    opacity: 0.9; 
+}
+
+.pin.active { 
+    opacity: 1 !important; 
+    fill: #ffeb3b; 
+    transform: scale(1.25); 
+    filter: drop-shadow(0 6px 12px rgba(255,235,59,0.25)); 
+}
+
+/* estilos de controles de acorde */
+.chord-controls { 
+    margin-top: 1rem; 
+    display: flex; 
+    gap: 0.5rem; 
+    align-items: center; 
+    flex-wrap: wrap; 
+}
+
+.chord-controls label { 
+    font-weight: 700; 
+    color: #fff; 
+    margin-right: 0.25rem; 
+}
+
+.chord-controls select { 
+    padding: 0.4rem 0.6rem; 
+    border-radius: 6px; 
+    border: none; 
+}
+
+.chord-controls .chord-info { 
+    margin-left: 0.5rem; 
+    color: #fff; 
+    font-weight: 700; 
+}
+
+/* estilo do indicador de cordas mudas */
+.chord-muted { 
+    opacity: 0.25; 
+}
+
+/* Configurador de notas */
+.note-configurator {
+    background: rgba(255,255,255,0.08);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+.note-configurator h3 {
+    color: #fff;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    text-align: left;
+}
+
+.config-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.config-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.config-group label {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.config-group select {
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.1);
+    font-size: 0.95rem;
+}
+
+.note-info {
+    margin-top: 0.75rem;
+    color: #ffeb3b;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+/* Responsividade */
+@media (max-width: 520px) {
+    .notas-top { 
+        flex-direction: column; 
+        align-items: flex-start; 
+    }
+    .notes-controls { 
+        width: 100%; 
+        display: flex; 
+        justify-content: flex-start; 
+        gap: 0.5rem; 
+    }
+}
+
+@media (max-width: 420px) {
+    .notas-visual { padding: 0.5rem; }
+    .notas-card { padding: 0.75rem; }
+    .chord-controls { width: 100%; gap: 0.5rem; }
+    .notas-top { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .notes-controls { width: 100%; display: flex; gap: 0.5rem; }
+    #fretboard { max-width: 100%; height: auto; }
+    .config-controls { flex-direction: column; align-items: stretch; }
+    .config-group { justify-content: space-between; }
+    .config-group select { width: 100%; }
+}
