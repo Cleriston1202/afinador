@@ -47,10 +47,11 @@
 }
 
 .pin-finger-label {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     fill: #1a1a1a;
     pointer-events: none;
+    user-select: none;
 }
 
 /* estilos de controles de acorde */

@@ -139,17 +139,23 @@ function showChordMajorMinor(note, type) {
     // Remove textos anteriores de numeração de dedos
     document.querySelectorAll('#pins text').forEach(el => el.remove());
     
-    let fingerCount = 0;
-    const fingerMap = {};
+    // Mapear dedos para posições (apenas frets 1-4)
+    const fingerPositions = {};
+    const usedFrets = [];
     
-    // Primeira passagem: mapear dedos para posições (de baixo para cima, ignorando cordas abertas e mudas)
     strings.forEach((s, i) => {
         const fret = chord.frets[i];
-        if (fret > 0) {  // Só conta como dedo se fret > 0 (não é corda aberta nem muda)
-            if (!fingerMap[fret]) {
-                fingerMap[fret] = ++fingerCount;
+        if (fret > 0) {
+            if (!usedFrets.includes(fret)) {
+                usedFrets.push(fret);
             }
         }
+    });
+    
+    // Ordenar frets e atribuir números de dedo (1-4)
+    usedFrets.sort((a, b) => a - b);
+    usedFrets.forEach((fret, index) => {
+        fingerPositions[fret] = Math.min(index + 1, 4);
     });
     
     strings.forEach((s, i) => {
@@ -160,30 +166,34 @@ function showChordMajorMinor(note, type) {
                 const el = document.getElementById(`pin-${s}-${f}`);
                 if (el) el.classList.add('chord-muted');
             }
+        } else if (fret === 0) {
+            // Corda aberta - apenas destaca
+            const id = `pin-${s}-${fret}`;
+            const el = document.getElementById(id);
+            if (el) el.classList.add('active');
         } else {
             // Destaca o pin da posição
             const id = `pin-${s}-${fret}`;
             const el = document.getElementById(id);
             if (el) el.classList.add('active');
             
-            // Adiciona número do dedo se necessário
-            if (fret > 0) {
-                const fingerNum = fingerMap[fret];
-                const svg = document.getElementById('pins').parentElement;
-                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                const circle = el;
-                const cx = parseFloat(circle.getAttribute('cx'));
-                const cy = parseFloat(circle.getAttribute('cy'));
-                
-                text.setAttribute('x', cx);
-                text.setAttribute('y', cy);
-                text.setAttribute('text-anchor', 'middle');
-                text.setAttribute('dominant-baseline', 'middle');
-                text.setAttribute('class', 'pin-finger-label');
-                text.textContent = fingerNum;
-                
-                document.getElementById('pins').appendChild(text);
-            }
+            // Adiciona número do dedo
+            const fingerNum = fingerPositions[fret];
+            const cx = parseFloat(el.getAttribute('cx'));
+            const cy = parseFloat(el.getAttribute('cy'));
+            
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', cx);
+            text.setAttribute('y', cy + 1);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('dominant-baseline', 'middle');
+            text.setAttribute('class', 'pin-finger-label');
+            text.setAttribute('font-size', '14');
+            text.setAttribute('font-weight', 'bold');
+            text.setAttribute('fill', '#1a1a1a');
+            text.textContent = fingerNum;
+            
+            document.getElementById('pins').appendChild(text);
         }
     });
     
@@ -191,6 +201,7 @@ function showChordMajorMinor(note, type) {
     if (positionsInfo) {
         const posStr = chord.frets.map((v, i) => {
             if (v === -1) return `${strings[i]}: X (mudo)`;
+            if (v === 0) return `${strings[i]}: 0 (aberta)`;
             return `${strings[i]}: ${v}`;
         }).join(' | ');
         positionsInfo.textContent = `${chord.name} — ${posStr}`;
