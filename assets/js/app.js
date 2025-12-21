@@ -39,7 +39,7 @@ const NOTES = [
 // Filtragem e detecção com configs otimizadas
 const MIN_DETECT_FREQ = 70; // Hz - mínimo plausível para corda de violão
 const MAX_DETECT_FREQ = 1000; // Hz - máximo plausível (inclui harmônicos)
-const RMS_THRESHOLD = 0.008; // limiar RMS reduzido para melhor sensibilidade
+const RMS_THRESHOLD = 0.001; // limiar RMS muito mais sensível
 const AUTO_DETECT_ENABLED = true; // detectar cordas automaticamente
 const AUTO_DETECT_CERTAINTY = 0.85; // confiança mínima para auto-detectar
 const MAX_HISTORY_EXTENDED = 16; // histórico maior para melhor suavização
@@ -141,28 +141,18 @@ startBtn.addEventListener('click', async () => {
   isAudioRunning = true;
   try {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
     const source = audioContext.createMediaStreamSource(stream);
     analyser = audioContext.createAnalyser();
-    analyser.fftSize = 2048;
+    analyser.fftSize = 4096; // Aumentado para melhor precisão
+    analyser.smoothingTimeConstant = 0.3;
     buffer = new Float32Array(analyser.fftSize);
 
-    // Aplicar filtros para reduzir ruídos fora da faixa do violão
-    const highpass = audioContext.createBiquadFilter();
-    highpass.type = 'highpass';
-    highpass.frequency.value = MIN_DETECT_FREQ;
-    highpass.Q.value = 1;
-
-    const lowpass = audioContext.createBiquadFilter();
-    lowpass.type = 'lowpass';
-    lowpass.frequency.value = MAX_DETECT_FREQ;
-    lowpass.Q.value = 0.7;
-
-    source.connect(highpass);
-    highpass.connect(lowpass);
-    lowpass.connect(analyser);
+    // Conexão simples sem muitos filtros
+    source.connect(analyser);
     detectPitch();
   } catch (error) {
+    console.error('Erro ao acessar microfone:', error);
     statusEl.textContent = 'Erro ao acessar o microfone. Permita acesso ao áudio.';
     statusEl.className = 'status high';
     startBtn.disabled = false;
@@ -177,46 +167,12 @@ function detectPitch() {
   addToHistory(frequency);
   const smoothFrequency = smoothedFreq();
 
-  // Checagem espectral
-  let isGuitarLike = false;
-  if (smoothFrequency !== -1) {
-    const freqData = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(freqData);
-    const fftSize = analyser.fftSize;
-    const bin = Math.round(smoothFrequency * fftSize / audioContext.sampleRate);
-    const start = Math.max(0, bin - 3);
-    const end = Math.min(freqData.length - 1, bin + 3);
-    let localSum = 0;
-    for (let i = start; i <= end; i++) localSum += freqData[i];
-    const localAvg = localSum / (end - start + 1);
-    const globalAvg = freqData.reduce((a, b) => a + b, 0) / freqData.length;
-    const spectralRatio = localAvg / (globalAvg + 1e-6);
-    isGuitarLike = (
-      smoothFrequency >= MIN_DETECT_FREQ &&
-      smoothFrequency <= MAX_DETECT_FREQ &&
-      spectralRatio > 2.5
-    );
-  }
-
-  // Tentar auto-detectar corda se nenhuma estiver selecionada
   let currentString = selectedString;
-  if (!currentString && smoothFrequency !== -1 && isGuitarLike) {
-    if (autoDetectString(smoothFrequency)) {
-      currentString = autoDetectedString;
-      // Auto-seleciona a corda detectada visualmente
-      const stringIndex = NOTES.findIndex(n => n.freq === autoDetectedString.freq && n.note === autoDetectedString.note && n.octave === autoDetectedString.octave);
-      if (stringIndex !== -1) {
-        selectString(stringIndex);
-        autoDetectInfo.style.display = 'block';
-      }
-    }
-  }
 
   if (smoothFrequency !== -1 && isGuitarLike && currentString) {
     frequencyEl.textContent = smoothFrequency.toFixed(2) + ' Hz';
     noteEl.textContent = currentString.note;
     noteFullNameEl.textContent = currentString.fullName + ' - ' + currentString.position;
-    tuningIndicator.style.display = 'flex';
     const targetFreqVal = currentString.freq;
     const diff = smoothFrequency - targetFreqVal;
     const cents = Math.round(1200 * Math.log2(smoothFrequency / targetFreqVal));
@@ -225,16 +181,13 @@ function detectPitch() {
     const accuracy = Math.max(0, Math.min(100, 100 - (absCents / maxCents) * 100));
     tuningBar.style.width = accuracy + '%';
     tuningBar.style.background = 'linear-gradient(90deg, var(--mono-300), var(--mono-200), var(--mono-100))';
-    tuningArrow.className = 'tuning-arrow';
+    
     if (absCents < 5) {
-      tuningArrow.textContent = '✓';
-      tuningArrow.className = 'tuning-arrow center';
+      lampLabel.innerHTML = '✓ Afinado';
     } else if (diff < 0) {
-      tuningArrow.textContent = '←';
-      tuningArrow.className = 'tuning-arrow left';
+      lampLabel.innerHTML = '↑ Aumente';
     } else {
-      tuningArrow.textContent = '→';
-      tuningArrow.className = 'tuning-arrow right';
+      lampLabel.innerHTML = '↓ Diminua';
     }
     const newState = absCents < 5 ? 'tuned' : absCents < 15 ? 'near' : 'far';
     const stateText = newState === 'tuned' ? 'Afinado' : newState === 'near' ? 'Quase lá' : diff < 0 ? 'Aumente' : 'Diminua';
@@ -308,11 +261,6 @@ function detectPitch() {
     accuracyText.textContent = '';
     setLamp('idle', 'Aguardando');
     lastFrequency = null;
-  } else if (!currentString && smoothFrequency !== -1 && isGuitarLike) {
-    // Som detectado mas corda ainda não identificada
-    statusEl.textContent = 'Som detectado... Identificando corda...';
-    statusEl.className = 'status';
-    frequencyEl.textContent = smoothFrequency.toFixed(2) + ' Hz';
   }
   requestAnimationFrame(detectPitch);
 }
@@ -358,57 +306,64 @@ function autoDetectString(freq) {
 }
 
 function autoCorrelate(buffer, sampleRate) {
-  let size = buffer.length;
+  // Calcular RMS para detecção de silêncio
   let rms = 0;
-  for (let i = 0; i < size; i++) rms += buffer[i] * buffer[i];
-  rms = Math.sqrt(rms / size);
+  for (let i = 0; i < buffer.length; i++) {
+    rms += buffer[i] * buffer[i];
+  }
+  rms = Math.sqrt(rms / buffer.length);
+  
+  // Se muito silencioso, retornar -1
   if (rms < RMS_THRESHOLD) return -1;
   
-  // Limpar picos e silêncios nas extremidades
-  let r1 = 0, r2 = size - 1;
-  const threshold = 0.2;
-  for (let i = 0; i < size / 2; i++) { if (Math.abs(buffer[i]) < threshold) { r1 = i; break; } }
-  for (let i = 1; i < size / 2; i++) { if (Math.abs(buffer[size - i]) < threshold) { r2 = size - i; break; } }
-  buffer = buffer.slice(r1, r2);
-  size = buffer.length;
+  // Implementar Autocorrelação com método de normalização
+  let maxSamples = buffer.length;
+  let best_offset = -1;
+  let best_correlation = 0;
+  let rms_sum = 0;
   
-  // Autocorrelação com refinamento
-  const c = new Array(size).fill(0);
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size - i; j++) {
-      c[i] += buffer[j] * buffer[j + i];
-    }
+  // Calcular RMS dos dados
+  for (let i = 0; i < maxSamples; i++) {
+    let val = buffer[i];
+    rms_sum += val * val;
   }
+  rms_sum = Math.sqrt(rms_sum / maxSamples);
   
-  // Encontra o primeiro pico significativo
-  let d = 0;
-  while (c[d] > c[d + 1]) d++;
+  // Não continuar se o RMS é muito baixo
+  if (rms_sum < RMS_THRESHOLD) return -1;
   
-  // Busca por máximo com melhor resolução
-  let maxval = -1, maxpos = -1;
-  for (let i = d; i < Math.min(size, d + size / 4); i++) {
-    if (c[i] > maxval) { 
-      maxval = c[i]; 
-      maxpos = i; 
+  // Encontrar o melhor lag (atraso)
+  let lastCorrelation = 1;
+  for (let offset = 1; offset < maxSamples - 100; offset++) {
+    let correlation = 0;
+    for (let i = 0; i < maxSamples - offset; i++) {
+      correlation += Math.abs(buffer[i] - buffer[i + offset]);
     }
-  }
-  
-  if (maxpos < d) return -1;
-  
-  // Interpolação parabólica para melhor precisão
-  if (maxpos > 0 && maxpos < c.length - 1) {
-    const y1 = c[maxpos - 1];
-    const y2 = c[maxpos];
-    const y3 = c[maxpos + 1];
-    const a = (y3 - 2 * y2 + y1) / 2;
-    const b = (y3 - y1) / 2;
     
-    if (a !== 0) {
-      const xOffset = -b / (2 * a);
-      maxpos = maxpos + xOffset;
+    // Correlação normalizada
+    correlation = 1 - (correlation / maxSamples);
+    
+    if (correlation > 0.9 && correlation > best_correlation) {
+      if (correlation > lastCorrelation) {
+        let foundGoodCorrelation = false;
+        if (correlation > best_correlation) {
+          best_correlation = correlation;
+          best_offset = offset;
+          foundGoodCorrelation = true;
+        }
+        if (foundGoodCorrelation) {
+          // Interpolação parabólica para melhor precisão
+          let shift = (buffer[best_offset + 1] - buffer[best_offset - 1]) / (2 * (2 * buffer[best_offset] - buffer[best_offset - 1] - buffer[best_offset + 1]));
+          return sampleRate / (best_offset + shift);
+        }
+      }
     }
+    lastCorrelation = correlation;
   }
   
-  const frequency = sampleRate / maxpos;
-  return frequency;
+  if (best_correlation > 0.01) {
+    return sampleRate / best_offset;
+  }
+  
+  return -1;
 }
