@@ -194,31 +194,70 @@ function showChordMajorMinor(note, type) {
             const cx = parseFloat(el.getAttribute('cx'));
             const cy = parseFloat(el.getAttribute('cy'));
             
-            // Determinar o símbolo a mostrar: traço para barré, número para dedo individual
-            let symbol;
+            // Determinar se esta posi73o faz parte de um barre (pestana)
             const isBarreChord = fretCounts[fret] >= 2;
-            
+
             if (isBarreChord) {
-                // Usar traço para barré
-                symbol = '—';
+                // Para pestana: desenhar um ret2ngulo arredondado cobrindo as cordas afetadas
+                const pinsGroup = document.getElementById('pins');
+                // localizar todos os cx das cordas que est3o nesse traste
+                const cxList = [];
+                strings.forEach((ss, ii) => {
+                    if (chord.frets[ii] === fret) {
+                        const p = document.getElementById(`pin-${ss}-${fret}`);
+                        if (p) cxList.push(parseFloat(p.getAttribute('cx')));
+                    }
+                });
+                if (cxList.length) {
+                    const minX = Math.min(...cxList);
+                    const maxX = Math.max(...cxList);
+                    const barPadding = 14; // padding horizontal para a barra
+                    const barHeight = 18; // altura da barra
+                    const barX = minX - barPadding;
+                    const barY = cy - barHeight/2;
+                    const barW = (maxX - minX) + barPadding * 2;
+
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', barX);
+                    rect.setAttribute('y', barY);
+                    rect.setAttribute('width', barW);
+                    rect.setAttribute('height', barHeight);
+                    rect.setAttribute('rx', Math.max(6, barHeight/2));
+                    rect.setAttribute('class', 'barre-rect');
+                    pinsGroup.appendChild(rect);
+
+                    // ra rotulo do dedo sobre a barra (ex: 1, 2)
+                    const fingerNum = fingerPositions[fret] || '';
+                    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    label.setAttribute('x', (minX + maxX) / 2);
+                    label.setAttribute('y', cy);
+                    label.setAttribute('text-anchor', 'middle');
+                    label.setAttribute('dominant-baseline', 'central');
+                    label.setAttribute('class', 'barre-finger-label');
+                    label.setAttribute('font-weight', '700');
+                    label.textContent = fingerNum || '';
+                    pinsGroup.appendChild(label);
+                }
+                // marcar visualmente os pins individuais tamb9m
                 el.classList.add('barre-chord');
             } else {
-                // Usar número do dedo
-                symbol = fingerPositions[fret];
+                // rptulo de dedo individual: usar ncmero com alto contraste
+                const fingerNum = fingerPositions[fret] || '';
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', cx);
+                text.setAttribute('y', cy);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'central');
+                text.setAttribute('class', 'pin-finger-label');
+                text.setAttribute('font-size', '14');
+                text.setAttribute('font-weight', '700');
+                // deixar o ncmero legavel sobre o pino (texto branco com contorno escuro)
+                text.setAttribute('fill', '#ffffff');
+                text.setAttribute('stroke', '#000000');
+                text.setAttribute('stroke-width', '0.9');
+                text.textContent = fingerNum;
+                document.getElementById('pins').appendChild(text);
             }
-            
-            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            text.setAttribute('x', cx);
-            text.setAttribute('y', cy);
-            text.setAttribute('text-anchor', 'middle');
-            text.setAttribute('dominant-baseline', 'central');
-            text.setAttribute('class', isBarreChord ? 'pin-barre-label' : 'pin-finger-label');
-            text.setAttribute('font-size', isBarreChord ? '16' : '13');
-            text.setAttribute('font-weight', 'bold');
-            text.setAttribute('fill', '#1a1a1a');
-            text.textContent = symbol;
-            
-            document.getElementById('pins').appendChild(text);
         }
     });
     
