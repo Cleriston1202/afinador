@@ -1,232 +1,267 @@
-/* JS extraído do index.html. Usa `defer` no HTML para carregar após DOM. */
-console.log('app.js loaded (refactor)');
-
 // 1. Mapeamento das frequências padrão (Afinação Standard - E2 A2 D3 G3 B3 E4)
 const notasViolao = [
-  { nota: 'E2', freq: 82.41 },
-  { nota: 'A2', freq: 110.00 },
-  { nota: 'D3', freq: 146.83 },
-  { nota: 'G3', freq: 196.00 },
-  { nota: 'B3', freq: 246.94 },
-  { nota: 'E4', freq: 329.63 }
+    { nota: 'E2', freq: 82.41 },
+    { nota: 'A2', freq: 110.00 },
+    { nota: 'D3', freq: 146.83 },
+    { nota: 'G3', freq: 196.00 },
+    { nota: 'B3', freq: 246.94 },
+    { nota: 'E4', freq: 329.63 }
 ];
 
-// Elementos da UI
-const startBtn = document.getElementById('startBtn');
-const frequencyEl = document.getElementById('frequency');
-const noteEl = document.getElementById('note');
-const noteFullNameEl = document.getElementById('noteFullName');
-const statusEl = document.getElementById('status');
-const stringsContainer = document.getElementById('stringsContainer');
-const tuningBar = document.getElementById('tuningBar');
-const accuracyText = document.getElementById('accuracyText');
-const targetFreq = document.getElementById('targetFreq');
-const stringInfo = document.getElementById('stringInfo');
-const stringInfoContent = document.getElementById('stringInfoContent');
-const tunedLamp = document.getElementById('tunedLamp');
-const lampLabel = document.getElementById('lampLabel');
-const tuningSection = document.getElementById('tuningSection');
-const backBtn = document.getElementById('backBtn');
+let audioCtx = null; // Inicialmente nulo, criado ao iniciar o afinador
+let analyser = null;
+let buffer = null;
+let mediaStream = null; // Para armazenar o stream e poder parar o microfone
+let animationFrameId = null; // Para controlar a animação
 
-// Estado do áudio
-let audioCtx;
-let analyser;
-let buffer;
-let selectedIndex = null; // índice da corda selecionada
-let isRunning = false;
-let historyFreq = [];
+// Elementos da interface
+const currentNoteDisplay = document.getElementById('current-note');
+const currentFreqDisplay = document.getElementById('current-freq');
+const statusMessage = document.getElementById('status-message');
+const targetNoteDisplay = document.getElementById('target-note');
+const targetFreqDisplay = document.getElementById('target-freq');
+const startTunerBtn = document.getElementById('start-tuner-btn');
+const stopTunerBtn = document.getElementById('stop-tuner-btn');
+const tunerNeedle = document.getElementById('tuner-needle');
+const homeImage = document.querySelector('.home-image'); // Imagem para a home
 
-// Configurações
-const FFT_SIZE = 2048;
-const RMS_THRESHOLD = 0.005; // sensibilidade aumentada para captar sinais mais fracos
+// Funções de controle da interface
+function updateTunerDisplay(freq, notaObj, diffCents) {
+    if (notaObj) {
+        currentNoteDisplay.textContent = notaObj.nota;
+        targetNoteDisplay.textContent = notaObj.nota;
+        targetFreqDisplay.textContent = notaObj.freq.toFixed(2);
+    } else {
+        currentNoteDisplay.textContent = "--";
+        targetNoteDisplay.textContent = "--";
+        targetFreqDisplay.textContent = "0.00";
+    }
 
-// Gera os botões de corda a partir de `notasViolao`
-notasViolao.forEach((n, i) => {
-  const btn = document.createElement('button');
-  btn.className = 'string-btn';
-  btn.id = `string-${i}`;
-  btn.innerHTML = `${n.nota}`;
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.string-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedIndex = i;
-    targetFreq.textContent = n.freq.toFixed(2) + ' Hz';
-    noteEl.textContent = n.nota.replace(/\d/, '') || n.nota;
-    noteFullNameEl.textContent = n.nota;
-    stringInfo.style.display = 'block';
-    stringInfoContent.innerHTML = `<strong>Nota:</strong> ${n.nota}<br><strong>Freq alvo:</strong> ${n.freq.toFixed(2)} Hz`;
-    tuningSection.style.display = 'block';
-    statusEl.textContent = 'Corda selecionada. Clique em Iniciar Afinador.';
-  });
-  stringsContainer.appendChild(btn);
-});
+    currentFreqDisplay.textContent = `${freq.toFixed(2)} Hz`;
 
-backBtn.addEventListener('click', () => {
-  if (isRunning && audioCtx) {
-    audioCtx.close();
-    audioCtx = null;
-    isRunning = false;
-  }
-  selectedIndex = null;
-  document.querySelectorAll('.string-btn').forEach(b => b.classList.remove('active'));
-  tuningSection.style.display = 'none';
-  startBtn.disabled = false;
-  startBtn.textContent = 'Iniciar Afinador';
-  historyFreq = [];
-  setLamp('idle', 'Pronto');
-  frequencyEl.textContent = '-- Hz';
-  noteEl.textContent = '--';
-});
+    // Atualiza a agulha do afinador
+    // O range do medidor é -50 a +50 cents.
+    // O agulha gira de -60deg a +60deg (total de 120deg).
+    // Mapeamos os cents para a rotação da agulha.
+    let rotation = diffCents * 1.2; // 120 graus / 100 cents = 1.2 graus por cent
+    rotation = Math.max(-60, Math.min(60, rotation)); // Limita a rotação
+    tunerNeedle.style.transform = `translateX(-50%) rotate(${rotation}deg)`;
 
-startBtn.addEventListener('click', async () => {
-  if (selectedIndex === null) {
-    statusEl.textContent = 'Selecione uma corda antes de iniciar.';
-    return;
-  }
-  startBtn.disabled = true;
-  startBtn.textContent = 'Afinador Ativo...';
-  try {
-    await iniciarAfinador();
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = 'Erro ao iniciar microfone. Verifique permissões.';
-    startBtn.disabled = false;
-    startBtn.textContent = 'Iniciar Afinador';
-  }
-});
-
-function setLamp(state, text) {
-  if (!tunedLamp) return;
-  tunedLamp.className = 'lamp-large ' + state;
-  lampLabel.textContent = text;
+    // Atualiza a mensagem de status
+    if (Math.abs(diffCents) < 5) { // Tolerância de +/- 5 cents
+        statusMessage.textContent = "AFINADO!";
+        statusMessage.className = "status-message tuned";
+        currentNoteDisplay.style.color = "var(--primary-color)";
+    } else if (diffCents < -5) {
+        statusMessage.textContent = "Aperte mais (muito baixo)";
+        statusMessage.className = "status-message flat";
+        currentNoteDisplay.style.color = "#e67e22"; // Laranja
+    } else {
+        statusMessage.textContent = "Aperte menos (muito alto)";
+        statusMessage.className = "status-message sharp";
+        currentNoteDisplay.style.color = "#e74c3c"; // Vermelho
+    }
 }
 
+function resetTunerDisplay() {
+    currentNoteDisplay.textContent = "--";
+    currentFreqDisplay.textContent = "0.00 Hz";
+    statusMessage.textContent = "Aguardando áudio...";
+    statusMessage.className = "status-message";
+    targetNoteDisplay.textContent = "--";
+    targetFreqDisplay.textContent = "0.00";
+    tunerNeedle.style.transform = `translateX(-50%) rotate(0deg)`;
+    currentNoteDisplay.style.color = "var(--text-color)";
+}
+
+// Lógica do Afinador (baseada no código anterior)
 async function iniciarAfinador() {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  analyser = audioCtx.createAnalyser();
-  analyser.fftSize = FFT_SIZE;
-  buffer = new Float32Array(analyser.fftSize);
+    if (audioCtx && audioCtx.state === 'running') {
+        return; // Afinador já está rodando
+    }
 
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
-  const source = audioCtx.createMediaStreamSource(stream);
-  source.connect(analyser);
-  isRunning = true;
-  statusEl.textContent = 'Afinador ativo. Toque a corda.';
-  detectarFrequencia();
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 2048;
+        buffer = new Float32Array(analyser.fftSize);
+
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const source = audioCtx.createMediaStreamSource(mediaStream);
+        source.connect(analyser);
+
+        startTunerBtn.disabled = true;
+        stopTunerBtn.disabled = false;
+        statusMessage.textContent = "Detectando...";
+        statusMessage.className = "status-message";
+
+        detectarFrequencia();
+    } catch (err) {
+        console.error("Erro ao acessar o microfone:", err);
+        statusMessage.textContent = "Erro: Permissão de microfone negada ou indisponível.";
+        statusMessage.className = "status-message sharp";
+        startTunerBtn.disabled = false;
+    }
 }
+
+function pararAfinador() {
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+
+    if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+    }
+
+    if (audioCtx) {
+        audioCtx.close().then(() => {
+            audioCtx = null;
+            analyser = null;
+            buffer = null;
+            console.log("Afinador parado e recursos liberados.");
+        });
+    }
+
+    startTunerBtn.disabled = false;
+    stopTunerBtn.disabled = true;
+    resetTunerDisplay();
+}
+
 
 function detectarFrequencia() {
-  if (!analyser || !audioCtx) {
-    if (isRunning) requestAnimationFrame(detectarFrequencia);
-    return;
-  }
-  analyser.getFloatTimeDomainData(buffer);
-  const freq = autoCorrelate(buffer, audioCtx.sampleRate);
+    if (!analyser || !buffer) return;
 
-  if (freq !== -1) {
-    // atualizar histórico simples
-    historyFreq.push(freq);
-    if (historyFreq.length > 6) historyFreq.shift();
-    const avg = historyFreq.reduce((a, b) => a + b, 0) / historyFreq.length;
+    analyser.getFloatTimeDomainData(buffer);
+    const sampleRate = audioCtx.sampleRate;
+    const freq = autoCorrelate(buffer, sampleRate);
 
-    const notaMaisProxima = encontrarNotaMaisProxima(avg);
-    atualizarUIComFrequencia(avg, notaMaisProxima);
-  } else {
-    statusEl.textContent = 'Aguardando som...';
-    frequencyEl.textContent = '-- Hz';
-  }
+    if (freq !== -1 && freq > 40 && freq < 4000) { // Filtra frequências irrealistas
+        const notaMaisProxima = encontrarNotaMaisProxima(freq);
+        const diff = freq - notaMaisProxima.freq;
+        const diffCents = 1200 * Math.log2(freq / notaMaisProxima.freq); // Diferença em cents
 
-  if (isRunning) requestAnimationFrame(detectarFrequencia);
+        updateTunerDisplay(freq, notaMaisProxima, diffCents);
+    } else {
+        updateTunerDisplay(0, null, 0); // Limpa o display se não houver detecção
+    }
+
+    animationFrameId = requestAnimationFrame(detectarFrequencia);
 }
 
-// Algoritmo de Autocorrelação para encontrar o período da onda
+
+// Algoritmo para identificar a frequência fundamental (Autocorrelação)
+// Mantido o mesmo do código anterior, com pequenas otimizações se necessário.
 function autoCorrelate(buffer, sampleRate) {
-  let size = buffer.length;
-  let rms = 0;
+    let size = buffer.length;
+    let rms = 0;
 
-  for (let i = 0; i < size; i++) {
-    rms += buffer[i] * buffer[i];
-  }
-  rms = Math.sqrt(rms / size);
-  if (rms < RMS_THRESHOLD) return -1; // Sinal muito fraco
-
-  let r1 = 0, r2 = size - 1, thres = 0.2;
-  for (let i = 0; i < size / 2; i++) {
-    if (Math.abs(buffer[i]) < thres) { r1 = i; break; }
-  }
-  for (let i = 1; i < size / 2; i++) {
-    if (Math.abs(buffer[size - i]) < thres) { r2 = size - i; break; }
-  }
-
-  const buf = buffer.slice(r1, r2);
-  size = buf.length;
-
-  let c = new Array(size).fill(0);
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size - i; j++) {
-      c[i] = c[i] + buf[j] * buf[j + i];
+    for (let i = 0; i < size; i++) {
+        rms += buffer[i] * buffer[i];
     }
-  }
+    rms = Math.sqrt(rms / size);
+    if (rms < 0.01) return -1; // Sinal muito fraco ou silêncio
 
-  let d = 0; while (c[d] > c[d + 1]) d++;
-  let maxval = -1, maxpos = -1;
-  for (let i = d; i < size; i++) {
-    if (c[i] > maxval) {
-      maxval = c[i];
-      maxpos = i;
+    let r1 = 0, r2 = size - 1, thres = 0.2;
+    for (let i = 0; i < size / 2; i++) {
+        if (Math.abs(buffer[i]) < thres) { r1 = i; break; }
     }
-  }
+    for (let i = 1; i < size / 2; i++) {
+        if (Math.abs(buffer[size - i]) < thres) { r2 = size - i; break; }
+    }
 
-  if (maxpos === 0) return -1;
-  return sampleRate / maxpos;
+    const buf = buffer.slice(r1, r2);
+    size = buf.length;
+
+    let c = new Array(size).fill(0);
+    for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size - i; j++) {
+            c[i] = c[i] + buf[j] * buf[j + i];
+        }
+    }
+
+    let d = 0; while (c[d] > c[d + 1]) d++;
+    let maxval = -1, maxpos = -1;
+    for (let i = d; i < size; i++) {
+        if (c[i] > maxval) {
+            maxval = c[i];
+            maxpos = i;
+        }
+    }
+
+    // Interpolação parabólica para maior precisão (opcional, mas comum em afinadores)
+    let s0 = c[maxpos - 1];
+    let s1 = c[maxpos];
+    let s2 = c[maxpos + 1];
+    let interpolatedPos = maxpos + 0.5 * ((s0 - s2) / (s0 - 2 * s1 + s2));
+
+    return sampleRate / interpolatedPos;
 }
 
 function encontrarNotaMaisProxima(freq) {
-  // encontra nota alvo de acordo com a corda selecionada (selectedIndex)
-  const alvo = notasViolao[selectedIndex];
-  // também calcula diferença em cents
-  const diff = freq - alvo.freq;
-  const cents = Math.round(1200 * Math.log2(freq / alvo.freq));
-  return { nota: alvo.nota, freqDet: freq, alvoFreq: alvo.freq, diff, cents };
+    let maisProxima = notasViolao[0];
+    let menorDiferenca = Math.abs(notasViolao[0].freq - freq);
+
+    for (let i = 1; i < notasViolao.length; i++) {
+        const diff = Math.abs(notasViolao[i].freq - freq);
+        if (diff < menorDiferenca) {
+            menorDiferenca = diff;
+            maisProxima = notasViolao[i];
+        }
+    }
+    return maisProxima;
 }
 
-function atualizarUIComFrequencia(freq, notaObj) {
-  frequencyEl.textContent = freq.toFixed(2) + ' Hz';
-  noteEl.textContent = notaObj.nota.replace(/\d/, '');
-  noteFullNameEl.textContent = notaObj.nota;
 
-  const absCents = Math.abs(notaObj.cents);
-  // atualizar barra simples
-  const maxCents = 100;
-  const accuracy = Math.max(0, Math.min(100, 100 - (absCents / maxCents) * 100));
-  tuningBar.style.width = accuracy + '%';
+// Controle de navegação e exibição de páginas
+const navLinks = document.querySelectorAll('.nav-links a');
+const pages = document.querySelectorAll('.page');
 
-  if (absCents <= 5) {
-    setLamp('tuned', 'AFINADO!');
-    accuracyText.textContent = `✓ ${absCents} cents`;
-    statusEl.textContent = 'AFINADO!';
-  } else if (notaObj.diff > 0) {
-    setLamp('far', 'Diminua');
-    accuracyText.textContent = `${absCents} cents`;
-    statusEl.textContent = 'Aperte menos';
-  } else {
-    setLamp('far', 'Aumente');
-    accuracyText.textContent = `${absCents} cents`;
-    statusEl.textContent = 'Aperte mais';
-  }
+function showPage(id) {
+    pages.forEach(page => {
+        page.classList.remove('active');
+    });
+    document.getElementById(id).classList.add('active');
+
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${id}`) {
+            link.classList.add('active');
+        }
+    });
+
+    // Se sair da página do afinador, parar o afinador
+    if (id !== 'afinador' && audioCtx && audioCtx.state === 'running') {
+        pararAfinador();
+    }
 }
 
-function encontrarNotaMaisProximaGlobal(freq) {
-  // caso necessário detectar globalmente (não usado no fluxo principal)
-  return notasViolao.reduce((prev, curr) => Math.abs(curr.freq - freq) < Math.abs(prev.freq - freq) ? curr : prev);
+// Inicializa a navegação baseada na hash da URL
+function handleHashChange() {
+    const hash = window.location.hash.replace('#', '');
+    if (hash && document.getElementById(hash)) {
+        showPage(hash);
+    } else {
+        showPage('home'); // Página inicial por padrão
+    }
 }
 
-function setLamp(state, text) {
-  if (!tunedLamp) return;
-  tunedLamp.className = 'lamp-large ' + state;
-  lampLabel.textContent = text;
-}
+// Event Listeners
+window.addEventListener('load', () => {
+    // Define uma imagem de violão aqui (URL de exemplo)
+    homeImage.src = 'https://via.placeholder.com/600x400/4CAF50/FFFFFF?text=Viol%C3%A3o'; // Imagem placeholder
+    handleHashChange(); // Exibe a página correta ao carregar
+});
+window.addEventListener('hashchange', handleHashChange);
 
-// Expor algumas funções para depuração
-window._afinador = { notasViolao, iniciarAfinador, autoCorrelate };
+startTunerBtn.addEventListener('click', iniciarAfinador);
+stopTunerBtn.addEventListener('click', pararAfinador);
 
+// Adiciona evento de clique para os links de navegação para atualizar a hash
+navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.hash = link.getAttribute('href');
+    });
+});

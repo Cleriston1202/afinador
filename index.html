@@ -1,47 +1,67 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#0b0b0b" />
-  <title>Afinador de Violão</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Afinador de Violão</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="app">
-    <nav class="menu">
-      <a href="index.html" class="active">Início</a>
-      <a href="afinador.html">Afinador</a>
-      <a href="#">Sobre</a>
-    </nav>
-    <h1>🎸 Afinador de Violão</h1>
-    
-    <div class="home-content">
-      <p>Bem-vindo ao Afinador de Violão!</p>
-      <p>Um afinador preciso e fácil de usar para seu instrumento.</p>
-      
-      <div class="features">
-        <div class="feature-card">
-          <h2>🎵 Detecção Automática</h2>
-          <p>Detecta automaticamente qual corda está sendo tocada</p>
-        </div>
-        
-        <div class="feature-card">
-          <h2>⚡ Tempo Real</h2>
-          <p>Feedback instantâneo da afinação de seu violão</p>
-        </div>
-        
-        <div class="feature-card">
-          <h2>🔧 Simples e Eficiente</h2>
-          <p>Interface intuitiva para todos os níveis de experiência</p>
-        </div>
-      </div>
-      
-      <a href="afinador.html" class="cta-btn">Começar a Afinar</a>
-      </div>
-    </div>
-    <script src="assets/js/app.js?v=2" defer></script>
-  </body>
-  </html>
+    <header>
+        <nav class="navbar">
+            <a href="#" class="logo">AfinadorPRO</a>
+            <ul class="nav-links">
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#afinador">Afinador</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="page active">
+            <div class="container">
+                <h1>Bem-vindo ao AfinadorPRO!</h1>
+                <p>O seu afinador de violão online, simples e preciso.</p>
+                <p>Clique em "Afinador" no menu para começar a afinar seu instrumento.</p>
+                <img src="" alt="Violão" class="home-image">
+                <button class="btn-primary" onclick="window.location.hash='#afinador'">Começar a Afinar</button>
+            </div>
+        </section>
+
+        <section id="afinador" class="page">
+            <div class="container afinador-container">
+                <h1>Afinador de Violão</h1>
+                <p class="description">Toque uma corda e veja a leitura em tempo real.</p>
+                
+                <div class="afinador-display">
+                    <p class="current-note-display" id="current-note">--</p>
+                    <p class="current-freq-display" id="current-freq">0.00 Hz</p>
+                </div>
+
+                <div class="tuner-gauge">
+                    <div class="tuner-needle" id="tuner-needle"></div>
+                    <div class="tuner-marks">
+                        <span class="mark low">-30</span>
+                        <span class="mark med">-15</span>
+                        <span class="mark zero">0</span>
+                        <span class="mark med">+15</span>
+                        <span class="mark high">+30</span>
+                    </div>
+                </div>
+
+                <div class="status-message" id="status-message">Aguardando áudio...</div>
+
+                <div class="target-notes">
+                    <p>Nota Alvo: <span id="target-note">--</span> (<span id="target-freq">0.00</span> Hz)</p>
+                </div>
+
+                <button id="start-tuner-btn" class="btn-primary">Iniciar Afinador</button>
+                <button id="stop-tuner-btn" class="btn-secondary" disabled>Parar Afinador</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
