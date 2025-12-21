@@ -395,17 +395,10 @@ img, svg { max-width: 100%; height: auto; display: block; }
 .notes-controls { gap:0.5rem; }
 .notas-visual { display:flex; justify-content:center; align-items:center; }
 #fretboard { width: 100%; max-width: 760px; height: auto; }
-.pin { transition: all 240ms ease; cursor: default; }
-.pin.active { opacity: 1 !important; fill: #ffeb3b; r:14; filter: drop-shadow(0 6px 12px rgba(255,235,59,0.25)); }
+.pin { transition: transform 120ms ease, opacity 120ms ease; cursor: default; transform-origin: center center; opacity: 0.9; }
+.pin.active { opacity: 1 !important; fill: #ffeb3b; transform: scale(1.25); filter: drop-shadow(0 6px 12px rgba(255,235,59,0.25)); }
 
-/* animação de pulso para destaque */
-.pin.active::after { content: ''; }
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 0.95; }
-    50% { transform: scale(1.4); opacity: 0.6; }
-    100% { transform: scale(1); opacity: 0.95; }
-}
-.pin.active { animation: pulse 900ms ease-in-out infinite; }
+/* Removida animação para destacar posições (apenas destaque estático) */
 
 /* Ajustes para controles em telas pequenas */
 @media (max-width: 520px) {
