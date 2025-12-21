@@ -249,8 +249,8 @@ function handleHashChange() {
 
 // Event Listeners
 window.addEventListener('load', () => {
-    // Define uma imagem de violão aqui (URL de exemplo)
-    homeImage.src = 'https://via.placeholder.com/600x400/4CAF50/FFFFFF?text=Viol%C3%A3o'; // Imagem placeholder
+    // Define uma imagem de violão local (substitui placeholder externo)
+    homeImage.src = 'assets/images/violao.svg';
     handleHashChange(); // Exibe a página correta ao carregar
 });
 window.addEventListener('hashchange', handleHashChange);
