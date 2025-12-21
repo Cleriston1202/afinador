@@ -169,7 +169,7 @@ function detectPitch() {
 
   let currentString = selectedString;
 
-  if (smoothFrequency !== -1 && isGuitarLike && currentString) {
+  if (smoothFrequency !== -1 && currentString) {
     frequencyEl.textContent = smoothFrequency.toFixed(2) + ' Hz';
     noteEl.textContent = currentString.note;
     noteFullNameEl.textContent = currentString.fullName + ' - ' + currentString.position;
