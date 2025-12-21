@@ -70,6 +70,15 @@
     user-select: none;
 }
 
+.pin-barre-label {
+    font-size: 16px;
+    font-weight: bold;
+    fill: #1a1a1a;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: 2px;
+}
+
 /* estilos de controles de acorde */
 .chord-controls { 
     margin-top: 1rem; 

@@ -139,6 +139,15 @@ function showChordMajorMinor(note, type) {
     // Remove textos anteriores de numeração de dedos
     document.querySelectorAll('#pins text').forEach(el => el.remove());
     
+    // Verificar primeiro se há acordes com barré (múltiplas cordas na mesma casa)
+    const fretCounts = {};
+    strings.forEach((s, i) => {
+        const fret = chord.frets[i];
+        if (fret > 0) {
+            fretCounts[fret] = (fretCounts[fret] || 0) + 1;
+        }
+    });
+    
     // Mapear dedos para posições (apenas frets 1-4)
     const fingerPositions = {};
     const usedFrets = [];
@@ -182,44 +191,34 @@ function showChordMajorMinor(note, type) {
                 el.classList.add('active');
             }
             
-            // Adiciona número do dedo com melhor posicionamento
-            const fingerNum = fingerPositions[fret];
             const cx = parseFloat(el.getAttribute('cx'));
             const cy = parseFloat(el.getAttribute('cy'));
+            
+            // Determinar o símbolo a mostrar: traço para barré, número para dedo individual
+            let symbol;
+            const isBarreChord = fretCounts[fret] >= 2;
+            
+            if (isBarreChord) {
+                // Usar traço para barré
+                symbol = '—';
+                el.classList.add('barre-chord');
+            } else {
+                // Usar número do dedo
+                symbol = fingerPositions[fret];
+            }
             
             const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             text.setAttribute('x', cx);
             text.setAttribute('y', cy);
             text.setAttribute('text-anchor', 'middle');
             text.setAttribute('dominant-baseline', 'central');
-            text.setAttribute('class', 'pin-finger-label');
-            text.setAttribute('font-size', '13');
+            text.setAttribute('class', isBarreChord ? 'pin-barre-label' : 'pin-finger-label');
+            text.setAttribute('font-size', isBarreChord ? '16' : '13');
             text.setAttribute('font-weight', 'bold');
             text.setAttribute('fill', '#1a1a1a');
-            text.textContent = fingerNum;
+            text.textContent = symbol;
             
             document.getElementById('pins').appendChild(text);
-        }
-    });
-    
-    // Verificar se há acordes com barré (múltiplas cordas na mesma casa)
-    const fretCounts = {};
-    strings.forEach((s, i) => {
-        const fret = chord.frets[i];
-        if (fret > 0) {
-            fretCounts[fret] = (fretCounts[fret] || 0) + 1;
-        }
-    });
-    
-    // Aplicar classe de barré
-    Object.entries(fretCounts).forEach(([fret, count]) => {
-        if (count >= 2) {
-            strings.forEach((s, i) => {
-                if (chord.frets[i] === parseInt(fret)) {
-                    const el = document.getElementById(`pin-${s}-${fret}`);
-                    if (el) el.classList.add('barre-chord');
-                }
-            });
         }
     });
     
