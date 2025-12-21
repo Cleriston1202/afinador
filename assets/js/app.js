@@ -116,7 +116,10 @@ async function iniciarAfinador() {
 }
 
 function detectarFrequencia() {
-  if (!analyser) return;
+  if (!analyser || !audioCtx) {
+    if (isRunning) requestAnimationFrame(detectarFrequencia);
+    return;
+  }
   analyser.getFloatTimeDomainData(buffer);
   const freq = autoCorrelate(buffer, audioCtx.sampleRate);
 
