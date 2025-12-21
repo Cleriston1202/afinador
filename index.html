@@ -126,6 +126,20 @@
 
                 <div class="notes-legend">
                     <p>Legenda: destaque animado mostra a posição da nota no braço.</p>
+                    <div class="chord-controls">
+                        <label for="chord-select">Selecionar Acorde:</label>
+                        <select id="chord-select">
+                            <option value="">-- Escolha um acorde --</option>
+                            <option value="C">C (Dó Maior)</option>
+                            <option value="G">G (Sol Maior)</option>
+                            <option value="D">D (Ré Maior)</option>
+                            <option value="Em">Em (Mi Menor)</option>
+                            <option value="Am">Am (Lá Menor)</option>
+                        </select>
+                        <button id="show-chord-btn" class="btn-secondary">Mostrar</button>
+                        <button id="strum-chord-btn" class="btn-primary">Tocar (Strum)</button>
+                        <div id="chord-info" class="chord-info" aria-live="polite"></div>
+                    </div>
                 </div>
             </div>
         </section>

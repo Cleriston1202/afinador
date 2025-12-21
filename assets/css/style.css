@@ -45,6 +45,8 @@ body {
 .nav-links {
     list-style: none;
     display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .nav-links li {
@@ -108,6 +110,7 @@ main {
     max-width: 1100px;
     margin: 0 auto;
 }
+img, svg { max-width: 100%; height: auto; display: block; }
 
 .home-image {
     max-width: 80%;
@@ -360,6 +363,27 @@ main {
     .hero-card { grid-template-columns: 1fr; }
 }
 
+/* Ajustes adicionais para telas muito pequenas (celulares) */
+@media (max-width: 420px) {
+    html, body { overflow-x: hidden; }
+    .navbar { padding: 0.6rem 0.75rem; }
+    .navbar .logo { font-size: 1.4rem; }
+    .nav-links { width: 100%; justify-content: space-around; }
+    .nav-links a { font-size: 0.95rem; padding: 0.25rem 0; }
+    .page { padding: 1rem; border-radius: 10px; }
+    .hero-content h1 { font-size: 1.6rem; }
+    .lead { font-size: 0.95rem; }
+    .hero-actions { flex-direction: column; align-items: stretch; }
+    .btn-primary, .btn-secondary { padding: 0.6rem 1rem; font-size: 1rem; }
+    .current-note-display { font-size: 3rem; }
+    .current-freq-display { font-size: 1.1rem; }
+    .tuner-gauge { width: 160px; height: 80px; }
+    .tuner-needle { height: 64px; }
+    .notas-top { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .notes-controls { width: 100%; display:flex; gap:0.5rem; }
+    #fretboard { max-width: 100%; height: auto; }
+}
+
 /* Notas (Fretboard) */
 .notas-card { text-align: center; padding: 1.25rem; }
 .notas-top { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; }
@@ -383,3 +407,12 @@ main {
     .notas-top { flex-direction: column; align-items: flex-start; }
     .notes-controls { width: 100%; display:flex; justify-content:flex-start; gap:0.5rem; }
 }
+
+/* estilos de controles de acorde */
+.chord-controls { margin-top: 1rem; display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }
+.chord-controls label { font-weight:700; color: #fff; margin-right: 0.25rem; }
+.chord-controls select { padding: 0.4rem 0.6rem; border-radius: 6px; border: none; }
+.chord-controls .chord-info { margin-left: 0.5rem; color: #fff; font-weight:700; }
+
+/* estilo do indicador de cordas mudas */
+.chord-muted { opacity: 0.25; }

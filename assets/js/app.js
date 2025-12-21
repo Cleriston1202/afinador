@@ -370,4 +370,84 @@ function initNotasSection() {
     if (stopBtn) stopBtn.addEventListener('click', stopNotesSequence);
     if (prevBtn) prevBtn.addEventListener('click', prevNote);
     if (nextBtn) nextBtn.addEventListener('click', nextNote);
+
+    // chord controls
+    const chordSelect = document.getElementById('chord-select');
+    const showChordBtn = document.getElementById('show-chord-btn');
+    const strumChordBtn = document.getElementById('strum-chord-btn');
+    const chordInfo = document.getElementById('chord-info');
+
+    if (showChordBtn) showChordBtn.addEventListener('click', () => {
+        const chord = chordSelect ? chordSelect.value : '';
+        if (chord) showChord(chord);
+    });
+    if (strumChordBtn) strumChordBtn.addEventListener('click', () => {
+        const chord = chordSelect ? chordSelect.value : '';
+        if (chord) strumChord(chord);
+    });
+    if (chordSelect) chordSelect.addEventListener('change', () => {
+        const chord = chordSelect.value;
+        if (chordInfo) chordInfo.textContent = chord ? `Acorde selecionado: ${chord}` : '';
+    });
+}
+
+/* ===== Chords: definição e visualização ===== */
+const CHORDS = {
+    'C':  { frets: [-1,3,2,0,1,0], name: 'C (Dó Maior)' },
+    'G':  { frets: [3,2,0,0,0,3], name: 'G (Sol Maior)' },
+    'D':  { frets: [-1,-1,0,2,3,2], name: 'D (Ré Maior)' },
+    'Em': { frets: [0,2,2,0,0,0], name: 'Em (Mi Menor)' },
+    'Am': { frets: [-1,0,2,2,1,0], name: 'Am (Lá Menor)' }
+};
+
+function showChord(chordKey) {
+    const chord = CHORDS[chordKey];
+    if (!chord) return;
+    clearActivePins();
+    const strings = ['E2','A2','D3','G3','B3','E4'];
+    // marca cordas mudas visualmente (aplica classe chord-muted)
+    document.querySelectorAll('#pins .pin').forEach(el => el.classList.remove('chord-muted'));
+    strings.forEach((s, i) => {
+        const fret = chord.frets[i];
+        if (fret === -1) {
+            // muted string: escurecer todos pins dessa corda
+            for (let f = 0; f <= 4; f++) {
+                const el = document.getElementById(`pin-${s}-${f}`);
+                if (el) el.classList.add('chord-muted');
+            }
+        } else {
+            const id = `pin-${s}-${fret}`;
+            const el = document.getElementById(id);
+            if (el) el.classList.add('active');
+        }
+    });
+    const chordInfo = document.getElementById('chord-info');
+    if (chordInfo) chordInfo.textContent = `${chord.name} — posições: ${chord.frets.map(v => v===-1? 'x': v).join(' ')}`;
+}
+
+function strumChord(chordKey) {
+    const chord = CHORDS[chordKey];
+    if (!chord) return;
+    clearActivePins();
+    const strings = ['E2','A2','D3','G3','B3','E4'];
+    // strum: destaque sequencial das cordas (do grave para o agudo)
+    let i = 0;
+    const max = strings.length;
+    const interval = 180; // ms entre cordas
+    const strumId = setInterval(() => {
+        // limpa anteriores (mas mantém muted styling)
+        document.querySelectorAll('#pins .pin.active').forEach(el => el.classList.remove('active'));
+        const s = strings[i];
+        const fret = chord.frets[i];
+        if (fret >= 0) {
+            const el = document.getElementById(`pin-${s}-${fret}`);
+            if (el) el.classList.add('active');
+        }
+        i++;
+        if (i >= max) {
+            clearInterval(strumId);
+            // ao fim, mostra o acorde completo
+            showChord(chordKey);
+        }
+    }, interval);
 }
