@@ -32,12 +32,16 @@
     transition: transform 120ms ease, opacity 120ms ease; 
     cursor: default; 
     transform-origin: center center; 
-    opacity: 0.9; 
+    opacity: 0.9;
+    stroke: rgba(255, 255, 255, 0.4);
+    stroke-width: 1.5;
 }
 
 .pin.active { 
     opacity: 1 !important; 
-    fill: #ffeb3b; 
+    fill: #ffeb3b;
+    stroke: #fff;
+    stroke-width: 2.5;
     transform: scale(1.25); 
     filter: drop-shadow(0 6px 12px rgba(255,235,59,0.25)); 
 }
