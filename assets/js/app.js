@@ -48,6 +48,7 @@ window.addEventListener('load', () => {
     homeImage.src = 'assets/images/violao.svg';
     handleHashChange();
     initNotasSection();
+    if (typeof initMetronome === 'function') initMetronome();
 });
 
 window.addEventListener('hashchange', handleHashChange);
